@@ -2150,7 +2150,7 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                     value="<p>Ejecute una evaluacion para ver las reglas activadas.</p>",
                     elem_classes=["rule-viewer-html-table"],
                 )
-            with gr.Column(elem_classes=["section-card"]):
+            with gr.Column(elem_classes=["section-card", "rule-selector-card"]):
                 gr.Markdown("### Visor individual de reglas")
                 selector_regla = gr.Dropdown(
                     choices=opciones_reglas(),
@@ -2159,6 +2159,7 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                     filterable=False,
                     allow_custom_value=False,
                     buttons=[],
+                    elem_id="rule-viewer-selector",
                     elem_classes=["rule-viewer-combobox"],
                 )
                 detalle_regla = gr.Markdown("Seleccione una regla para ver sus antecedentes y consecuentes.")

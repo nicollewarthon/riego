@@ -838,13 +838,34 @@ body [role="menu"] [aria-selected="true"]:hover,
     overflow: visible !important;
 }
 
+.gradio-container .rule-selector-card,
+.gradio-container .rule-selector-card *,
+.gradio-container #rule-viewer-selector,
+.gradio-container #rule-viewer-selector *,
+.gradio-container #rule-viewer-selector .wrap,
+.gradio-container #rule-viewer-selector .container,
+.gradio-container #rule-viewer-selector .form {
+    overflow: visible !important;
+}
+
+.gradio-container .rule-selector-card {
+    position: relative !important;
+    z-index: 90000 !important;
+}
+
+.gradio-container .rule-selector-card:focus-within {
+    z-index: 120000 !important;
+}
+
 .gradio-container .rule-viewer-combobox {
     position: relative !important;
-    z-index: 6000 !important;
+    z-index: 95000 !important;
 }
 
 .gradio-container .rule-viewer-combobox [role="combobox"],
-.gradio-container .rule-viewer-combobox input {
+.gradio-container .rule-viewer-combobox input,
+.gradio-container #rule-viewer-selector [role="combobox"],
+.gradio-container #rule-viewer-selector input {
     background: #ffffff !important;
     color: #1f2937 !important;
     border: 1px solid #d7d2e8 !important;
@@ -855,33 +876,50 @@ body [role="menu"] [aria-selected="true"]:hover,
 
 .gradio-container .rule-viewer-combobox [role="listbox"],
 .gradio-container .rule-viewer-combobox .options,
-.gradio-container .rule-viewer-combobox .dropdown-options {
+.gradio-container .rule-viewer-combobox .dropdown-options,
+.gradio-container #rule-viewer-selector [role="listbox"],
+.gradio-container #rule-viewer-selector .options,
+.gradio-container #rule-viewer-selector .dropdown-options {
     position: absolute !important;
     top: calc(100% + 6px) !important;
     left: 0 !important;
     width: 100% !important;
     min-width: 100% !important;
-    max-height: 300px !important;
+    max-height: min(340px, 52vh) !important;
     overflow-y: auto !important;
+    overflow-x: hidden !important;
     background: #ffffff !important;
     border: 1px solid #d7d2e8 !important;
     border-radius: 14px !important;
     box-shadow: 0 16px 34px rgba(88, 70, 140, 0.16) !important;
-    z-index: 100000 !important;
+    z-index: 130000 !important;
+    animation: dropdownOpen 0.18s ease both !important;
 }
 
-.gradio-container .rule-viewer-combobox [role="option"] {
+.gradio-container .rule-viewer-combobox [role="option"],
+.gradio-container #rule-viewer-selector [role="option"] {
     background: #ffffff !important;
     color: #1f2937 !important;
     min-height: 38px !important;
     padding: 8px 12px !important;
     border-radius: 10px !important;
+    display: flex !important;
+    align-items: center !important;
 }
 
 .gradio-container .rule-viewer-combobox [role="option"]:hover,
-.gradio-container .rule-viewer-combobox [role="option"][aria-selected="true"] {
+.gradio-container .rule-viewer-combobox [role="option"][aria-selected="true"],
+.gradio-container #rule-viewer-selector [role="option"]:hover,
+.gradio-container #rule-viewer-selector [role="option"][aria-selected="true"] {
     background: #f3eeff !important;
     color: #1f2937 !important;
+}
+
+body [role="listbox"],
+body .svelte-select-list,
+body .dropdown-options,
+body .options {
+    z-index: 130000 !important;
 }
 
 .gradio-container .rule-viewer-table-shell {
