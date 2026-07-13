@@ -205,25 +205,69 @@ button.primary span,
 .gradio-container button:not(.primary) {
     color: #000000 !important;
 }
+@keyframes tabFadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+@keyframes dropdownFadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 .gradio-container .tab-nav {
-    gap: 4px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    min-height: 48px !important;
+    padding: 0 2px !important;
     border-bottom: 1px solid #dbeafe !important;
     background: transparent !important;
+    overflow-x: auto !important;
+    scrollbar-width: thin !important;
 }
 .gradio-container .tab-nav button,
 .gradio-container .tabs button,
-.gradio-container button[role="tab"] {
+.gradio-container button[role="tab"],
+.gradio-container .tab-nav button[aria-haspopup="menu"],
+.gradio-container .tab-nav button[aria-haspopup="true"] {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex: 0 0 auto !important;
+    box-sizing: border-box !important;
     min-height: 44px !important;
     height: 44px !important;
-    padding: 0 14px !important;
+    padding: 0 16px !important;
+    margin: 0 !important;
     border: 0 !important;
     border-bottom: 3px solid transparent !important;
     border-radius: 8px 8px 0 0 !important;
     background: transparent !important;
     box-shadow: none !important;
     color: #000000 !important;
-    font-weight: 500 !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
     transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease !important;
+}
+.gradio-container .tab-nav button span,
+.gradio-container .tabs button span,
+.gradio-container button[role="tab"] span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    line-height: 1 !important;
 }
 .gradio-container .tab-nav button:hover,
 .gradio-container .tabs button:hover,
@@ -249,6 +293,15 @@ button.primary span,
     box-shadow: none !important;
     font-weight: 600 !important;
 }
+.gradio-container .tab-nav button.selected span,
+.gradio-container .tab-nav button.active span,
+.gradio-container .tab-nav button[aria-selected="true"] span,
+.gradio-container .tabs button.selected span,
+.gradio-container .tabs button.active span,
+.gradio-container .tabs button[aria-selected="true"] span,
+.gradio-container button[role="tab"][aria-selected="true"] span {
+    color: #0f766e !important;
+}
 .gradio-container .tab-nav button.selected:hover,
 .gradio-container .tab-nav button.active:hover,
 .gradio-container .tab-nav button[aria-selected="true"]:hover,
@@ -258,6 +311,45 @@ button.primary span,
 .gradio-container button[role="tab"][aria-selected="true"]:hover {
     background: #ecfeff !important;
     color: #0f766e !important;
+}
+.gradio-container .tabitem,
+.gradio-container [role="tabpanel"],
+.gradio-container [data-testid="tabitem"] {
+    animation: tabFadeSlide 0.25s ease both !important;
+}
+.gradio-container .tab-nav [role="menu"],
+.gradio-container .tabs [role="menu"],
+.gradio-container [role="listbox"],
+.gradio-container .tab-nav ul,
+.gradio-container .tabs ul {
+    border-radius: 12px !important;
+    border: 1px solid #dbeafe !important;
+    background: #ffffff !important;
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14) !important;
+    padding: 6px !important;
+    animation: dropdownFadeSlide 0.22s ease both !important;
+}
+.gradio-container .tab-nav [role="menu"] button,
+.gradio-container .tabs [role="menu"] button,
+.gradio-container [role="listbox"] button,
+.gradio-container .tab-nav ul button,
+.gradio-container .tabs ul button {
+    width: 100% !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    justify-content: flex-start !important;
+    padding: 0 12px !important;
+    border-radius: 8px !important;
+    border-bottom: 0 !important;
+    color: #000000 !important;
+    background: transparent !important;
+}
+.gradio-container .tab-nav [role="menu"] button:hover,
+.gradio-container .tabs [role="menu"] button:hover,
+.gradio-container [role="listbox"] button:hover,
+.gradio-container .tab-nav ul button:hover,
+.gradio-container .tabs ul button:hover {
+    background: #eff6ff !important;
 }
 @media (max-width: 760px) {
     .hero {
