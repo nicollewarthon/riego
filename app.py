@@ -1576,6 +1576,9 @@ def crear_interfaz() -> gr.Blocks:
                             CULTIVOS,
                             value="Tomate",
                             show_label=False,
+                            filterable=False,
+                            allow_custom_value=False,
+                            buttons=[],
                             elem_classes=["clean-dropdown"],
                         )
                     boton_calcular = gr.Button("Calcular riego inteligente", variant="primary")
@@ -1606,11 +1609,17 @@ def crear_interfaz() -> gr.Blocks:
                     choices=list(membership.VARIABLES_DIFUSAS.keys()),
                     value="humedad_suelo",
                     label="Variable difusa",
+                    filterable=False,
+                    allow_custom_value=False,
+                    buttons=[],
                 )
                 selector_salida_agregada = gr.Dropdown(
                     choices=list(SALIDAS.keys()),
                     value="Tiempo de riego",
                     label="Salida agregada",
+                    filterable=False,
+                    allow_custom_value=False,
+                    buttons=[],
                 )
             boton_actualizar_graficas = gr.Button("Actualizar graficas con valores ingresados", variant="primary")
             with gr.Row():
@@ -1657,7 +1666,13 @@ def crear_interfaz() -> gr.Blocks:
             )
             rule_viewer_tabla_html = gr.HTML()
             gr.Markdown("### Visor individual de reglas")
-            selector_regla = gr.Dropdown(choices=opciones_reglas(), label="Regla")
+            selector_regla = gr.Dropdown(
+                choices=opciones_reglas(),
+                label="Regla",
+                filterable=False,
+                allow_custom_value=False,
+                buttons=[],
+            )
             detalle_regla = gr.Markdown("Seleccione una regla para ver sus antecedentes y consecuentes.")
 
         with gr.Tab("Surface Viewer"):
@@ -1671,8 +1686,18 @@ def crear_interfaz() -> gr.Blocks:
                     list(SUPERFICIES_3D.keys()),
                     value="Humedad del suelo vs temperatura ambiental -> tiempo de riego",
                     label="Superficie",
+                    filterable=False,
+                    allow_custom_value=False,
+                    buttons=[],
                 )
-                cultivo_surface = gr.Dropdown(CULTIVOS, value="Tomate", label="Cultivo")
+                cultivo_surface = gr.Dropdown(
+                    CULTIVOS,
+                    value="Tomate",
+                    label="Cultivo",
+                    filterable=False,
+                    allow_custom_value=False,
+                    buttons=[],
+                )
             with gr.Row():
                 humedad_suelo_surface = gr.Slider(0, 100, value=35, step=1, label="Humedad del suelo fija (%)")
                 temperatura_surface = gr.Slider(0, 45, value=28, step=0.5, label="Temperatura fija (C)")

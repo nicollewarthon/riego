@@ -174,6 +174,13 @@
     width: 100% !important;
 }
 
+.gradio-container .clean-dropdown input,
+.gradio-container .dropdown input[role="combobox"],
+.gradio-container [role="combobox"] input {
+    cursor: pointer !important;
+    caret-color: transparent !important;
+}
+
 .gradio-container .clean-dropdown:hover,
 .gradio-container .clean-dropdown [role="combobox"]:hover {
     background: #eff6ff !important;
@@ -216,6 +223,66 @@
 .gradio-container [role="menuitem"]:hover,
 .gradio-container .options li:hover,
 .gradio-container .dropdown-options li:hover {
+    background: #eff6ff !important;
+    color: #12372a !important;
+}
+
+body [role="menu"],
+body [role="listbox"],
+body .options,
+body .dropdown-options,
+body .popover,
+body .menu,
+body .svelte-select-list {
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #dbe7e1 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.16) !important;
+    padding: 6px !important;
+    z-index: 99999 !important;
+}
+
+body [role="menu"] *,
+body [role="listbox"] *,
+body .options *,
+body .dropdown-options *,
+body .popover *,
+body .menu *,
+body .svelte-select-list * {
+    color: #1f2937 !important;
+}
+
+body [role="menuitem"],
+body [role="option"],
+body [role="menu"] button,
+body [role="listbox"] button,
+body [role="menu"] li,
+body [role="listbox"] li,
+body .options li,
+body .dropdown-options li,
+body .svelte-select-list div {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+body [role="menuitem"]:hover,
+body [role="option"]:hover,
+body [role="menu"] button:hover,
+body [role="listbox"] button:hover,
+body [role="menu"] li:hover,
+body [role="listbox"] li:hover,
+body .options li:hover,
+body .dropdown-options li:hover,
+body .svelte-select-list div:hover {
     background: #eff6ff !important;
     color: #12372a !important;
 }
