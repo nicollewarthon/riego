@@ -1160,36 +1160,81 @@ body .options {
 }
 
 .gradio-container .surface-control-card {
-    padding: 18px 22px !important;
+    padding: 24px 28px !important;
+    overflow: visible !important;
 }
 
 .gradio-container .surface-slider,
 .gradio-container .surface-slider .wrap,
-.gradio-container .surface-slider .container {
+.gradio-container .surface-slider .container,
+.gradio-container .surface-slider .input-container,
+.gradio-container .surface-slider .block {
     width: 100% !important;
     max-width: 100% !important;
     min-width: 0 !important;
     background: transparent !important;
     border: none !important;
     box-shadow: none !important;
+    overflow: visible !important;
+}
+
+.gradio-container .surface-slider .label-wrap,
+.gradio-container .surface-slider label {
+    width: 100% !important;
+    margin: 0 0 18px 0 !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: #12372a !important;
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.gradio-container .surface-slider .wrap:has(input[type="range"]),
+.gradio-container .surface-slider .container:has(input[type="range"]),
+.gradio-container .surface-slider .input-container:has(input[type="range"]),
+.gradio-container .surface-slider div:has(> input[type="range"]) {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    width: 100% !important;
+    max-width: 100% !important;
 }
 
 .gradio-container .surface-slider input[type="range"] {
-    width: 100% !important;
+    display: block !important;
+    width: 90% !important;
+    max-width: 920px !important;
     height: 6px !important;
+    min-height: 6px !important;
+    margin: 4px auto 0 auto !important;
     border-radius: 999px !important;
     accent-color: #0f766e !important;
+    flex: 0 0 auto !important;
 }
 
 .gradio-container .surface-slider input[type="number"] {
-    min-width: 94px !important;
+    display: block !important;
+    width: 104px !important;
+    min-width: 104px !important;
+    max-width: 104px !important;
     height: 38px !important;
+    min-height: 38px !important;
+    margin: 10px auto 0 auto !important;
     background: #ffffff !important;
     color: #1f2937 !important;
-    border: 1px solid #cbd5e1 !important;
+    border: 1px solid #93c5fd !important;
     border-radius: 8px !important;
+    padding: 0 10px !important;
     text-align: center !important;
     box-shadow: none !important;
+    flex: 0 0 auto !important;
+    align-self: center !important;
+    font-weight: 600 !important;
 }
 
 .gradio-container .final-reading {
