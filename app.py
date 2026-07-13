@@ -270,17 +270,6 @@ CSS = """
     font-size: 12px;
     margin-top: 2px;
 }
-.site-navline {
-    display: flex;
-    gap: 18px;
-    align-items: center;
-    font-size: 12px;
-    text-transform: uppercase;
-}
-.site-navline span {
-    color: #334155 !important;
-    font-weight: 600;
-}
 .home-promo-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -703,7 +692,6 @@ button.primary span,
         padding-right: 12px;
     }
     .site-brandbar,
-    .site-navline,
     .home-promo-grid,
     .home-service-strip,
     .module-grid {
@@ -713,11 +701,6 @@ button.primary span,
         align-items: flex-start;
         gap: 12px;
         flex-direction: column;
-    }
-    .site-navline {
-        display: grid;
-        width: 100%;
-        gap: 8px;
     }
     .site-topbar {
         flex-direction: column;
@@ -1506,12 +1489,6 @@ def crear_interfaz() -> gr.Blocks:
                         <div class="brand-name">Riego Mamdani</div>
                         <div class="brand-subtitle">Sistema academico de decision agricola</div>
                     </div>
-                </div>
-                <div class="site-navline">
-                    <span>Inicio</span>
-                    <span>Evaluacion</span>
-                    <span>Reglas</span>
-                    <span>Reportes</span>
                 </div>
             </div>
             """
