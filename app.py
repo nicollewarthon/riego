@@ -1313,25 +1313,66 @@ def tabla_reglas() -> pd.DataFrame:
     return pd.DataFrame(rules.obtener_tabla_reglas())
 
 
-def opciones_filtro_reglas() -> list[str]:
-    """Devuelve opciones para filtrar la base de reglas por identificador."""
-    return ["Todas"] + [regla.identificador for regla in rules.obtener_reglas_difusas()]
+NOMBRES_VARIABLES_REGLAS = {
+    "humedad_suelo": "Humedad del suelo",
+    "temperatura_ambiental": "Temperatura ambiental",
+    "humedad_ambiental": "Humedad ambiental",
+    "velocidad_viento": "Velocidad del viento",
+    "tipo_cultivo": "Tipo de cultivo",
+}
 
 
-def filtrar_tabla_reglas(filtro_regla: str, texto_busqueda: str) -> pd.DataFrame:
-    """Filtra la tabla de reglas por ID y texto libre."""
-    tabla = tabla_reglas()
-    if filtro_regla and filtro_regla != "Todas":
-        tabla = tabla[tabla["id"] == filtro_regla]
+def formatear_texto_regla(valor: str) -> str:
+    """Convierte identificadores internos en texto legible sin modificar la regla."""
+    return valor.replace("_", " ").capitalize()
 
-    busqueda = (texto_busqueda or "").strip().lower()
-    if busqueda:
-        mascara = tabla.apply(
-            lambda fila: fila.astype(str).str.lower().str.contains(busqueda, regex=False).any(),
-            axis=1,
+
+def tabla_reglas_html() -> str:
+    """Renderiza la base de reglas Mamdani como tabla HTML amplia y legible."""
+    filas_html = []
+    for regla in rules.obtener_reglas_difusas():
+        antecedentes = "<br>".join(
+            f"<strong>{html.escape(NOMBRES_VARIABLES_REGLAS.get(antecedente.variable, antecedente.variable))}</strong> "
+            f"es {html.escape(formatear_texto_regla(antecedente.conjunto))}"
+            for antecedente in regla.antecedentes
         )
-        tabla = tabla[mascara]
-    return tabla
+        consecuentes = (
+            f"Tiempo de riego = {html.escape(formatear_texto_regla(regla.consecuentes.tiempo_riego))}<br>"
+            f"Frecuencia = {html.escape(formatear_texto_regla(regla.consecuentes.frecuencia_riego))}<br>"
+            f"Caudal = {html.escape(formatear_texto_regla(regla.consecuentes.caudal_agua))}"
+        )
+        filas_html.append(
+            "<tr>"
+            f"<td class='rules-id'>{html.escape(regla.identificador)}</td>"
+            f"<td><span class='rule-keyword'>SI</span><br>{antecedentes}</td>"
+            f"<td class='rules-operator'>{html.escape(regla.operador_logico)}</td>"
+            f"<td><span class='rule-keyword'>ENTONCES</span><br>{consecuentes}</td>"
+            f"<td>{html.escape(formatear_texto_regla(regla.consecuentes.tiempo_riego))}</td>"
+            f"<td>{html.escape(formatear_texto_regla(regla.consecuentes.frecuencia_riego))}</td>"
+            f"<td>{html.escape(formatear_texto_regla(regla.consecuentes.caudal_agua))}</td>"
+            "</tr>"
+        )
+
+    return f"""
+<div class="rules-table-shell">
+    <div class="rules-table-scroll" role="region" aria-label="Base de reglas Mamdani">
+        <table class="excel-rules-table">
+            <thead>
+                <tr>
+                    <th>ID de regla</th>
+                    <th>Antecedentes (SI)</th>
+                    <th>Operador</th>
+                    <th>Consecuentes (ENTONCES)</th>
+                    <th>Tiempo de riego</th>
+                    <th>Frecuencia de riego</th>
+                    <th>Caudal</th>
+                </tr>
+            </thead>
+            <tbody>{''.join(filas_html)}</tbody>
+        </table>
+    </div>
+</div>
+"""
 
 
 def mostrar_seccion_mas(opcion: str) -> tuple[gr.update, gr.update, gr.update]:
@@ -2060,28 +2101,15 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                 )
 
         with gr.Tab("Base de reglas"):
-            with gr.Column(elem_classes=["section-card", "rules-panel"]):
+            with gr.Column(elem_classes=["section-card", "rules-panel", "rules-table-card"]):
                 gr.Markdown("### Base de reglas Mamdani")
-                with gr.Row(elem_classes=["controls-grid"]):
-                    filtro_regla = gr.Dropdown(
-                        choices=opciones_filtro_reglas(),
-                        value="Todas",
-                        label="Filtrar por regla",
-                        filterable=False,
-                        allow_custom_value=False,
-                        buttons=[],
-                    )
-                    busqueda_reglas = gr.Textbox(
-                        label="Buscar",
-                        placeholder="Buscar por antecedente, consecuente o explicacion",
-                    )
-                tabla_base_reglas = gr.Dataframe(
-                    value=tabla_reglas,
-                    interactive=False,
-                    wrap=True,
-                    max_height=650,
-                    show_row_numbers=False,
-                    elem_classes=["light-dataframe", "wide-dataframe", "rules-dataframe"],
+                gr.Markdown(
+                    "En esta sección se presentan todas las reglas lingüísticas utilizadas por el "
+                    "sistema de inferencia difusa Mamdani para la toma de decisiones del riego."
+                )
+                gr.HTML(
+                    value=tabla_reglas_html(),
+                    elem_classes=["rules-html-table"],
                 )
 
         with gr.Tab("Rule Viewer"):
@@ -2321,16 +2349,6 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementad
             fn=mostrar_seccion_mas,
             inputs=selector_mas,
             outputs=[seccion_surface, seccion_historial, seccion_acerca],
-        )
-        filtro_regla.change(
-            fn=filtrar_tabla_reglas,
-            inputs=[filtro_regla, busqueda_reglas],
-            outputs=tabla_base_reglas,
-        )
-        busqueda_reglas.change(
-            fn=filtrar_tabla_reglas,
-            inputs=[filtro_regla, busqueda_reglas],
-            outputs=tabla_base_reglas,
         )
         boton_guardar_historial.click(
             fn=guardar_evaluacion_historial,
