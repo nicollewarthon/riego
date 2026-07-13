@@ -205,6 +205,60 @@ button.primary span,
 .gradio-container button:not(.primary) {
     color: #000000 !important;
 }
+.gradio-container .tab-nav {
+    gap: 4px !important;
+    border-bottom: 1px solid #dbeafe !important;
+    background: transparent !important;
+}
+.gradio-container .tab-nav button,
+.gradio-container .tabs button,
+.gradio-container button[role="tab"] {
+    min-height: 44px !important;
+    height: 44px !important;
+    padding: 0 14px !important;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 8px 8px 0 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #000000 !important;
+    font-weight: 500 !important;
+    transition: color 0.25s ease, background-color 0.25s ease, border-color 0.25s ease !important;
+}
+.gradio-container .tab-nav button:hover,
+.gradio-container .tabs button:hover,
+.gradio-container button[role="tab"]:hover {
+    background: #eff6ff !important;
+    color: #000000 !important;
+}
+.gradio-container .tab-nav button.selected,
+.gradio-container .tab-nav button.active,
+.gradio-container .tab-nav button[aria-selected="true"],
+.gradio-container .tabs button.selected,
+.gradio-container .tabs button.active,
+.gradio-container .tabs button[aria-selected="true"],
+.gradio-container button[role="tab"].selected,
+.gradio-container button[role="tab"].active,
+.gradio-container button[role="tab"][aria-selected="true"],
+.gradio-container [role="tab"][aria-selected="true"] {
+    background: transparent !important;
+    background-color: transparent !important;
+    color: #0f766e !important;
+    border-bottom: 3px solid #0f766e !important;
+    border-radius: 8px 8px 0 0 !important;
+    box-shadow: none !important;
+    font-weight: 600 !important;
+}
+.gradio-container .tab-nav button.selected:hover,
+.gradio-container .tab-nav button.active:hover,
+.gradio-container .tab-nav button[aria-selected="true"]:hover,
+.gradio-container .tabs button.selected:hover,
+.gradio-container .tabs button.active:hover,
+.gradio-container .tabs button[aria-selected="true"]:hover,
+.gradio-container button[role="tab"][aria-selected="true"]:hover {
+    background: #ecfeff !important;
+    color: #0f766e !important;
+}
 @media (max-width: 760px) {
     .hero {
         padding: 18px;
