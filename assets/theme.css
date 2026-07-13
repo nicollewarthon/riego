@@ -534,3 +534,166 @@ body [role="menu"] [aria-selected="true"]:hover,
         width: 100% !important;
     }
 }
+
+.mamdani-viewer {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    width: 100%;
+}
+
+.mamdani-card {
+    width: 100%;
+    box-sizing: border-box;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 24px;
+    box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
+    overflow-wrap: anywhere;
+}
+
+.mamdani-card h2,
+.mamdani-card h3,
+.mamdani-card h4 {
+    color: #12372a !important;
+    margin-top: 0;
+}
+
+.mamdani-card h2 {
+    font-size: 1.65rem;
+}
+
+.mamdani-card h3 {
+    font-size: 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+}
+
+.mamdani-card p,
+.mamdani-card li {
+    color: #334155 !important;
+    line-height: 1.65;
+}
+
+.mamdani-subcard {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 18px;
+    margin: 14px 0;
+}
+
+.mamdani-result {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    border-radius: 10px;
+    padding: 10px 12px;
+    font-weight: 700;
+}
+
+.mamdani-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+.mamdani-table th {
+    background: #dbeafe !important;
+    color: #1e3a8a !important;
+    text-align: left;
+    padding: 12px;
+    border: 1px solid #bfdbfe;
+}
+
+.mamdani-table td {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    padding: 12px;
+    border: 1px solid #e5e7eb;
+    vertical-align: top;
+}
+
+.mamdani-details {
+    margin-top: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.mamdani-details summary {
+    color: #1e3a8a !important;
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.mamdani-plot-wrap {
+    margin-top: 16px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.mamdani-plot {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.crisp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    margin: 14px 0;
+}
+
+.crisp-grid div {
+    background: #f8fafc;
+    border: 1px solid #dbe7e1;
+    border-radius: 12px;
+    padding: 16px;
+}
+
+.crisp-grid strong,
+.crisp-grid span {
+    display: block;
+}
+
+.crisp-grid strong {
+    color: #12372a !important;
+    margin-bottom: 8px;
+}
+
+.crisp-grid span {
+    color: #0f766e !important;
+    font-size: 1.25rem;
+    font-weight: 800;
+}
+
+.conclusion-card {
+    background: linear-gradient(135deg, #ffffff, #ecfdf5);
+}
+
+@media (max-width: 760px) {
+    .mamdani-card {
+        padding: 16px;
+    }
+
+    .mamdani-subcard {
+        padding: 14px;
+    }
+
+    .crisp-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .mamdani-table {
+        display: block;
+        overflow-x: auto;
+    }
+}

@@ -6,6 +6,9 @@ Aplicacion preparada para CPU basica y despliegue como servicio web en Render.
 from __future__ import annotations
 
 import os
+import base64
+import html
+import io
 from pathlib import Path
 from uuid import uuid4
 from typing import Any
@@ -770,6 +773,339 @@ def formatear_diccionario_grados(grados: dict[str, dict[str, float]]) -> str:
     return "\n".join(lineas)
 
 
+NOMBRES_ENTRADAS = {
+    "humedad_suelo": "Humedad del suelo",
+    "temperatura_ambiental": "Temperatura ambiental",
+    "humedad_ambiental": "Humedad ambiental",
+    "velocidad_viento": "Velocidad del viento",
+    "tipo_cultivo": "Tipo de cultivo",
+}
+
+NOMBRES_SALIDAS = {
+    "tiempo_riego": ("Tiempo de riego", "minutos"),
+    "frecuencia_riego": ("Frecuencia de riego", "dias"),
+    "caudal_agua": ("Caudal de agua", "L/min"),
+}
+
+
+def limpiar_texto(texto: str) -> str:
+    """Escapa texto para insertarlo en bloques HTML seguros."""
+    return html.escape(str(texto), quote=True)
+
+
+def construir_tabla_entradas_html(
+    humedad_suelo: float,
+    temperatura: float,
+    humedad_ambiental: float,
+    velocidad_viento: float,
+    tipo_cultivo: str,
+) -> str:
+    """Crea una tabla HTML elegante con los valores ingresados."""
+    codigo = fuzzy_engine.resolver_tipo_cultivo(tipo_cultivo)
+    filas = [
+        ("Humedad del suelo", f"{humedad_suelo:.2f}", "%"),
+        ("Temperatura ambiental", f"{temperatura:.2f}", "C"),
+        ("Humedad ambiental", f"{humedad_ambiental:.2f}", "%"),
+        ("Velocidad del viento", f"{velocidad_viento:.2f}", "km/h"),
+        ("Tipo de cultivo", f"{limpiar_texto(tipo_cultivo)} (codigo {codigo:g})", "categoria"),
+    ]
+    cuerpo = "".join(
+        f"<tr><td>{variable}</td><td>{valor}</td><td>{unidad}</td></tr>"
+        for variable, valor, unidad in filas
+    )
+    return (
+        "<table class='mamdani-table'>"
+        "<thead><tr><th>Variable</th><th>Valor</th><th>Unidad</th></tr></thead>"
+        f"<tbody>{cuerpo}</tbody></table>"
+    )
+
+
+def valores_entrada_para_procedimiento(
+    humedad_suelo: float,
+    temperatura: float,
+    humedad_ambiental: float,
+    velocidad_viento: float,
+    tipo_cultivo: str,
+) -> dict[str, float]:
+    """Devuelve las entradas con los nombres tecnicos usados por membership.py."""
+    return {
+        "humedad_suelo": float(humedad_suelo),
+        "temperatura_ambiental": float(temperatura),
+        "humedad_ambiental": float(humedad_ambiental),
+        "velocidad_viento": float(velocidad_viento),
+        "tipo_cultivo": float(fuzzy_engine.resolver_tipo_cultivo(tipo_cultivo)),
+    }
+
+
+def explicar_cero_membresia(valor: float, definicion: membership.DefinicionMembresia) -> str:
+    """Explica brevemente por que un conjunto tiene grado cero."""
+    parametros = definicion.parametros
+    if definicion.tipo == "triangular":
+        a, _, c = parametros
+        if valor <= a or valor >= c:
+            return f"El valor x={valor:g} esta fuera del soporte [{a:g}, {c:g}], por eso su pertenencia es 0."
+    else:
+        a, _, _, d = parametros
+        if valor < a or valor > d:
+            return f"El valor x={valor:g} esta fuera del soporte [{a:g}, {d:g}], por eso su pertenencia es 0."
+    return "El valor cae en un punto limite de la funcion donde la pertenencia es 0."
+
+
+def formula_membresia_latex(
+    valor: float,
+    definicion: membership.DefinicionMembresia,
+    grado: float,
+) -> str:
+    """Construye la explicacion LaTeX de una funcion de membresia."""
+    x = float(valor)
+    parametros = definicion.parametros
+    nombre = limpiar_texto(definicion.nombre.replace("_", " "))
+    if grado <= 0:
+        return (
+            f"<p><strong>{nombre}</strong>: {explicar_cero_membresia(x, definicion)}</p>"
+            f"<p class='mamdani-result'>\\(\\mu_{{{definicion.nombre}}}({x:g}) = 0.0000\\)</p>"
+        )
+
+    if definicion.tipo == "triangular":
+        a, b, c = parametros
+        if a < x < b:
+            expresion = (
+                "\\[\\mu(x)=\\frac{x-a}{b-a}\\]"
+                f"\\[\\mu({x:g})=\\frac{{{x:g}-{a:g}}}{{{b:g}-{a:g}}}"
+                f"=\\frac{{{x-a:g}}}{{{b-a:g}}}={grado:.4f}\\]"
+            )
+            tramo = "tramo ascendente de la funcion triangular"
+        elif b < x < c:
+            expresion = (
+                "\\[\\mu(x)=\\frac{c-x}{c-b}\\]"
+                f"\\[\\mu({x:g})=\\frac{{{c:g}-{x:g}}}{{{c:g}-{b:g}}}"
+                f"=\\frac{{{c-x:g}}}{{{c-b:g}}}={grado:.4f}\\]"
+            )
+            tramo = "tramo descendente de la funcion triangular"
+        else:
+            expresion = f"\\[\\mu({x:g})=1.0000\\]"
+            tramo = "pico de la funcion triangular"
+        parametros_html = f"a={a:g}, b={b:g}, c={c:g}"
+        tipo = "Triangular"
+    else:
+        a, b, c, d = parametros
+        if a < x < b:
+            expresion = (
+                "\\[\\mu(x)=\\frac{x-a}{b-a}\\]"
+                f"\\[\\mu({x:g})=\\frac{{{x:g}-{a:g}}}{{{b:g}-{a:g}}}"
+                f"=\\frac{{{x-a:g}}}{{{b-a:g}}}={grado:.4f}\\]"
+            )
+            tramo = "tramo ascendente de la funcion trapezoidal"
+        elif c < x < d:
+            expresion = (
+                "\\[\\mu(x)=\\frac{d-x}{d-c}\\]"
+                f"\\[\\mu({x:g})=\\frac{{{d:g}-{x:g}}}{{{d:g}-{c:g}}}"
+                f"=\\frac{{{d-x:g}}}{{{d-c:g}}}={grado:.4f}\\]"
+            )
+            tramo = "tramo descendente de la funcion trapezoidal"
+        else:
+            expresion = f"\\[\\mu({x:g})=1.0000\\]"
+            tramo = "meseta de pertenencia maxima de la funcion trapezoidal"
+        parametros_html = f"a={a:g}, b={b:g}, c={c:g}, d={d:g}"
+        tipo = "Trapezoidal"
+
+    return f"""
+<div class='mamdani-subcard'>
+<p><strong>Conjunto linguistico:</strong> {nombre}</p>
+<p><strong>Funcion utilizada:</strong> {tipo}. Parametros: {parametros_html}.</p>
+<p><strong>Tramo aplicado:</strong> {tramo}.</p>
+{expresion}
+<p class='mamdani-result'>Resultado: \\(\\mu_{{{definicion.nombre}}}={grado:.4f}\\)</p>
+</div>
+"""
+
+
+def construir_fuzzificacion_html(
+    resultado: dict[str, Any],
+    valores_entrada: dict[str, float],
+) -> str:
+    """Explica matematicamente la fuzzificacion de cada entrada."""
+    bloques = []
+    for nombre_variable, conjuntos in resultado["grados_pertenencia"].items():
+        variable = membership.obtener_variable(nombre_variable)
+        valor = valores_entrada[nombre_variable]
+        detalles = []
+        for definicion in variable.conjuntos:
+            grado = float(conjuntos[definicion.nombre])
+            if grado > 0:
+                detalles.append(formula_membresia_latex(valor, definicion, grado))
+        ceros = [
+            f"<li><strong>{limpiar_texto(definicion.nombre.replace('_', ' '))}</strong>: "
+            f"{explicar_cero_membresia(valor, definicion)}</li>"
+            for definicion in variable.conjuntos
+            if float(conjuntos[definicion.nombre]) == 0
+        ]
+        ceros_html = ""
+        if ceros:
+            ceros_html = (
+                "<details class='mamdani-details'><summary>Conjuntos con pertenencia cero</summary>"
+                f"<ul>{''.join(ceros)}</ul></details>"
+            )
+        bloques.append(
+            "<div class='mamdani-subcard'>"
+            f"<h4>{limpiar_texto(variable.nombre)}</h4>"
+            f"<p><strong>Valor ingresado:</strong> {valor:g} {limpiar_texto(variable.unidad)}</p>"
+            f"{''.join(detalles)}{ceros_html}</div>"
+        )
+    return "".join(bloques)
+
+
+def construir_reglas_activadas_html(resultado: dict[str, Any]) -> str:
+    """Muestra el procedimiento de activacion de todas las reglas activadas."""
+    bloques = []
+    grados = resultado["grados_pertenencia"]
+    for regla in resultado["reglas_activadas"]:
+        antecedentes = regla["antecedentes"]
+        valores = [
+            float(grados[antecedente["variable"]][antecedente["conjunto"]])
+            for antecedente in antecedentes
+        ]
+        operador = regla["operador"].upper()
+        funcion = "min" if operador == "AND" else "max"
+        simbolo = "\\min" if operador == "AND" else "\\max"
+        antecedentes_html = "".join(
+            f"<li>{limpiar_texto(a['variable'])} = <strong>{limpiar_texto(a['conjunto'])}</strong> "
+            f"con \\(\\mu={v:.4f}\\)</li>"
+            for a, v in zip(antecedentes, valores)
+        )
+        consecuentes = regla["consecuentes"]
+        consecuentes_html = "".join(
+            f"<li>{limpiar_texto(nombre)} = <strong>{limpiar_texto(valor)}</strong></li>"
+            for nombre, valor in consecuentes.items()
+        )
+        valores_latex = ", ".join(f"{valor:.4f}" for valor in valores)
+        resultado_alpha = float(regla["grado_activacion"])
+        bloques.append(
+            "<div class='mamdani-subcard'>"
+            f"<h4>Regla {limpiar_texto(regla['id'])}</h4>"
+            f"<p>{limpiar_texto(regla['texto'])}</p>"
+            f"<p><strong>Antecedentes:</strong></p><ul>{antecedentes_html}</ul>"
+            f"<p><strong>Consecuentes:</strong></p><ul>{consecuentes_html}</ul>"
+            f"\\[\\alpha_{{{regla['id']}}}={simbolo}(\\mu_1,\\mu_2,\\ldots,\\mu_n)\\]"
+            f"\\[\\alpha_{{{regla['id']}}}={funcion}({valores_latex})={resultado_alpha:.4f}\\]"
+            f"<p>Se usa <strong>{funcion.upper()}</strong> porque la regla tiene operador logico "
+            f"<strong>{operador}</strong>.</p>"
+            "</div>"
+        )
+    return "".join(bloques)
+
+
+def construir_agregacion_html(resultado: dict[str, Any]) -> str:
+    """Explica implicacion y agregacion Mamdani para las salidas."""
+    bloques = []
+    reglas = resultado["reglas_activadas"]
+    for salida, (nombre_visible, _) in NOMBRES_SALIDAS.items():
+        terminos = []
+        detalle = []
+        for regla in reglas:
+            conjunto = regla["consecuentes"][salida]
+            rid = regla["id"]
+            alpha = float(regla["grado_activacion"])
+            terminos.append(f"\\mu'_{{{rid}}}(z)")
+            detalle.append(
+                f"<li>Regla {limpiar_texto(rid)}: conjunto <strong>{limpiar_texto(conjunto)}</strong>, "
+                f"\\(\\mu'_{{{rid}}}(z)=\\min({alpha:.4f},\\mu_{{{conjunto}}}(z))\\)</li>"
+            )
+        formula_max = ", ".join(terminos)
+        bloques.append(
+            "<div class='mamdani-subcard'>"
+            f"<h4>{nombre_visible}</h4>"
+            "<p>Cada regla activa genera un consecuente recortado mediante implicacion Mamdani.</p>"
+            f"<ul>{''.join(detalle)}</ul>"
+            "\\[\\mu_{agregada}(z)=\\max(\\mu'_1(z),\\mu'_2(z),\\ldots,\\mu'_n(z))\\]"
+            f"\\[\\mu_{{agregada}}(z)=\\max({formula_max})\\]"
+            "<p>El operador MAX conserva, para cada punto del universo, el mayor grado aportado por las reglas activadas.</p>"
+            "</div>"
+        )
+    return "".join(bloques)
+
+
+def construir_grafica_agregacion_base64(resultado: dict[str, Any]) -> str:
+    """Genera una grafica embebida de las salidas agregadas."""
+    agregados = resultado["conjuntos_agregados"]
+    fig, axes = plt.subplots(1, 3, figsize=(12, 3.2))
+    for ax, (salida, (nombre_visible, unidad)) in zip(axes, NOMBRES_SALIDAS.items()):
+        universo = np.asarray(agregados[salida]["universo"], dtype=float)
+        membresia = np.asarray(agregados[salida]["membresia"], dtype=float)
+        centroide = float(resultado[salida])
+        ax.plot(universo, membresia, color="#0f766e", linewidth=2)
+        ax.fill_between(universo, membresia, color="#99f6e4", alpha=0.65)
+        ax.axvline(centroide, color="#1d4ed8", linestyle="--", linewidth=1.8)
+        ax.set_title(nombre_visible)
+        ax.set_xlabel(unidad)
+        ax.set_ylabel("mu")
+        ax.grid(alpha=0.25)
+    fig.tight_layout()
+    buffer = io.BytesIO()
+    fig.savefig(buffer, format="png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    imagen = base64.b64encode(buffer.getvalue()).decode("ascii")
+    return f"<img class='mamdani-plot' src='data:image/png;base64,{imagen}' alt='Grafica de agregacion Mamdani'/>"
+
+
+def construir_desfuzzificacion_html(resultado: dict[str, Any]) -> str:
+    """Explica el calculo del centroide de cada salida usando agregados reales."""
+    filas = []
+    bloques = []
+    for salida, (nombre_visible, unidad) in NOMBRES_SALIDAS.items():
+        datos = resultado["conjuntos_agregados"][salida]
+        universo = np.asarray(datos["universo"], dtype=float)
+        membresia = np.asarray(datos["membresia"], dtype=float)
+        numerador = float(np.sum(universo * membresia))
+        denominador = float(np.sum(membresia))
+        centroide = float(resultado[salida])
+        filas.append(
+            f"<tr><td>{nombre_visible}</td><td>{numerador:.4f}</td><td>{denominador:.4f}</td>"
+            f"<td>{centroide:.4f} {unidad}</td></tr>"
+        )
+        bloques.append(
+            "<div class='mamdani-subcard'>"
+            f"<h4>{nombre_visible}</h4>"
+            "\\[z^*=\\frac{\\sum_i z_i\\mu(z_i)}{\\sum_i\\mu(z_i)}\\]"
+            f"\\[z^*=\\frac{{{numerador:.4f}}}{{{denominador:.4f}}}={centroide:.4f}\\;{limpiar_texto(unidad)}\\]"
+            "<p>El universo de salida se discretiza; para cada punto se multiplica "
+            "\\(z_i\\) por su grado agregado \\(\\mu(z_i)\\), y luego se divide entre la suma total de grados.</p>"
+            "</div>"
+        )
+    tabla = (
+        "<table class='mamdani-table'><thead><tr><th>Salida</th><th>Numerador</th>"
+        "<th>Denominador</th><th>Centroide</th></tr></thead>"
+        f"<tbody>{''.join(filas)}</tbody></table>"
+    )
+    return tabla + "".join(bloques)
+
+
+def construir_conclusion_html(resultado: dict[str, Any]) -> str:
+    """Construye una conclusion educativa a partir de los resultados reales."""
+    reglas = resultado["reglas_activadas"]
+    regla_principal = max(reglas, key=lambda regla: regla["grado_activacion"])
+    grados_activos = []
+    for variable, conjuntos in resultado["grados_pertenencia"].items():
+        activos = [(nombre, grado) for nombre, grado in conjuntos.items() if grado > 0]
+        if activos:
+            principal = max(activos, key=lambda item: item[1])
+            grados_activos.append(
+                f"<li>{limpiar_texto(NOMBRES_ENTRADAS.get(variable, variable))}: "
+                f"<strong>{limpiar_texto(principal[0])}</strong> con \\(\\mu={principal[1]:.4f}\\)</li>"
+            )
+    return f"""
+<ul>{''.join(grados_activos)}</ul>
+<p>Se activaron <strong>{len(reglas)}</strong> reglas. La regla dominante fue
+<strong>{limpiar_texto(regla_principal['id'])}</strong> con
+\\(\\alpha={float(regla_principal['grado_activacion']):.4f}\\).</p>
+<p>Tras la agregacion por MAX y la desfuzzificacion por centroide, el sistema obtuvo:
+<strong>{resultado['tiempo_riego']:.2f} minutos</strong>,
+<strong>{resultado['frecuencia_riego']:.2f} dias</strong> y
+<strong>{resultado['caudal_agua']:.2f} L/min</strong>.</p>
+<p>{limpiar_texto(resultado['interpretacion'])}</p>
+"""
+
+
 def generar_procedimiento(
     resultado: dict[str, Any] | None,
     humedad_suelo: float,
@@ -778,7 +1114,7 @@ def generar_procedimiento(
     velocidad_viento: float,
     tipo_cultivo: str,
 ) -> str:
-    """Genera el procedimiento Mamdani paso a paso."""
+    """Genera un visor educativo del procedimiento Mamdani paso a paso."""
     if not resultado:
         _, _, _, _, _, resultado = ejecutar_calculo(
             humedad_suelo,
@@ -790,48 +1126,85 @@ def generar_procedimiento(
     if not resultado:
         return "No hay resultados disponibles para mostrar el procedimiento."
 
-    reglas_activadas = resultado["reglas_activadas"]
-    reglas_md = "\n".join(
-        f"- `{regla['id']}` alpha=`{regla['grado_activacion']:.4f}`: {regla['texto']}"
-        for regla in reglas_activadas[:12]
+    valores_entrada = valores_entrada_para_procedimiento(
+        humedad_suelo,
+        temperatura,
+        humedad_ambiental,
+        velocidad_viento,
+        tipo_cultivo,
     )
-    if len(reglas_activadas) > 12:
-        reglas_md += f"\n- ... {len(reglas_activadas) - 12} reglas activadas adicionales."
-
-    pasos = resultado["pasos_matematicos"]
+    tabla_entradas = construir_tabla_entradas_html(
+        humedad_suelo,
+        temperatura,
+        humedad_ambiental,
+        velocidad_viento,
+        tipo_cultivo,
+    )
+    grafica_agregacion = construir_grafica_agregacion_base64(resultado)
     return f"""
-## Procedimiento Mamdani paso a paso
+<div class="mamdani-viewer">
+<section class="mamdani-card">
+<h2>Procedimiento Mamdani paso a paso</h2>
+<p>Este visor muestra como el motor difuso transforma las entradas crisp en grados de pertenencia,
+evalua reglas linguisticas, agrega consecuentes y obtiene salidas numericas mediante el centroide.</p>
+</section>
 
-### 1. Valores ingresados
-- Humedad del suelo: `{humedad_suelo:.2f} %`
-- Temperatura ambiental: `{temperatura:.2f} C`
-- Humedad ambiental: `{humedad_ambiental:.2f} %`
-- Velocidad del viento: `{velocidad_viento:.2f} km/h`
-- Tipo de cultivo: `{tipo_cultivo}`
+<section class="mamdani-card">
+<h3>Paso 1. Valores ingresados</h3>
+<p>Estos son los valores crisp proporcionados por el usuario antes de iniciar la fuzzificacion.</p>
+{tabla_entradas}
+</section>
 
-### 2. Grados de pertenencia
-{formatear_diccionario_grados(resultado["grados_pertenencia"])}
+<section class="mamdani-card">
+<h3>Paso 2. Fuzzificacion</h3>
+<p>La fuzzificacion convierte cada entrada numerica en grados de pertenencia
+\\(\\mu(x)\\) sobre conjuntos linguisticos.</p>
+\\[\\mu_{{triangular}}(x;a,b,c)=\\max\\left(\\min\\left(\\frac{{x-a}}{{b-a}},\\frac{{c-x}}{{c-b}}\\right),0\\right)\\]
+\\[\\mu_{{trapezoidal}}(x;a,b,c,d)=\\max\\left(\\min\\left(\\frac{{x-a}}{{b-a}},1,\\frac{{d-x}}{{d-c}}\\right),0\\right)\\]
+{construir_fuzzificacion_html(resultado, valores_entrada)}
+</section>
 
-### 3. Reglas activadas y calculo de MIN
-{pasos["activacion"]}
+<section class="mamdani-card">
+<h3>Paso 3. Activacion de reglas</h3>
+<p>En reglas con operador AND se usa el minimo porque todos los antecedentes deben cumplirse simultaneamente.
+En reglas OR se usa el maximo porque basta con que un antecedente tenga mayor evidencia.</p>
+\\[\\alpha_{{AND}}=\\min(\\mu_1,\\mu_2,\\ldots,\\mu_n)\\]
+\\[\\alpha_{{OR}}=\\max(\\mu_1,\\mu_2,\\ldots,\\mu_n)\\]
+{construir_reglas_activadas_html(resultado)}
+</section>
 
-{reglas_md}
+<section class="mamdani-card">
+<h3>Paso 4. Implicacion y agregacion</h3>
+<p>Cada regla activa recorta sus consecuentes con el grado de activacion \\(\\alpha\\).
+Luego todas las funciones recortadas se unen mediante MAX.</p>
+\\[\\mu'_B(z)=\\min(\\alpha,\\mu_B(z))\\]
+{construir_agregacion_html(resultado)}
+<div class="mamdani-plot-wrap">{grafica_agregacion}</div>
+</section>
 
-### 4. Agregacion por MAX
-{pasos["implicacion"]}
+<section class="mamdani-card">
+<h3>Paso 5. Desfuzzificacion por centroide</h3>
+<p>El metodo del centroide calcula el punto de equilibrio del area difusa agregada.</p>
+\\[z^*=\\frac{{\\sum_i z_i\\mu(z_i)}}{{\\sum_i\\mu(z_i)}}\\]
+{construir_desfuzzificacion_html(resultado)}
+</section>
 
-{pasos["agregacion"]}
+<section class="mamdani-card">
+<h3>Paso 6. Salidas crisp</h3>
+<div class="crisp-grid">
+<div><strong>Tiempo de riego</strong><span>{resultado["tiempo_riego"]:.4f} minutos</span></div>
+<div><strong>Frecuencia de riego</strong><span>{resultado["frecuencia_riego"]:.4f} dias</span></div>
+<div><strong>Caudal de agua</strong><span>{resultado["caudal_agua"]:.4f} L/min</span></div>
+</div>
+<p>No se aplica una conversion adicional: cada salida ya esta expresada en su universo original
+despues de la desfuzzificacion.</p>
+</section>
 
-### 5. Formula del centroide
-{pasos["desfuzzificacion"]}
-
-### 6. Calculo final de salidas
-- Tiempo de riego: `{resultado["tiempo_riego"]:.4f} minutos`
-- Frecuencia de riego: `{resultado["frecuencia_riego"]:.4f} dias`
-- Caudal de agua: `{resultado["caudal_agua"]:.4f} L/min`
-
-### 7. Explicacion entendible
-{resultado["interpretacion"]}
+<section class="mamdani-card conclusion-card">
+<h3>Paso 7. Interpretacion del sistema</h3>
+{construir_conclusion_html(resultado)}
+</section>
+</div>
 """
 
 
@@ -1475,11 +1848,26 @@ def crear_interfaz() -> gr.Blocks:
                     )
                     archivo_reporte_pdf = gr.File(label="Reporte PDF")
                     mensaje_reporte_pdf = gr.Textbox(label="Estado del reporte", interactive=False)
-            procedimiento_desde_evaluacion = gr.Markdown()
+            procedimiento_desde_evaluacion = gr.Markdown(
+                sanitize_html=False,
+                latex_delimiters=[
+                    {"left": "$$", "right": "$$", "display": True},
+                    {"left": "\\[", "right": "\\]", "display": True},
+                    {"left": "\\(", "right": "\\)", "display": False},
+                ],
+            )
 
         with gr.Tab("Procedimiento Mamdani"):
             gr.Markdown("### Trazabilidad matematica del ultimo calculo")
-            procedimiento_general = gr.Markdown("Ejecute primero una evaluacion de riego.")
+            procedimiento_general = gr.Markdown(
+                "Ejecute primero una evaluacion de riego.",
+                sanitize_html=False,
+                latex_delimiters=[
+                    {"left": "$$", "right": "$$", "display": True},
+                    {"left": "\\[", "right": "\\]", "display": True},
+                    {"left": "\\(", "right": "\\)", "display": False},
+                ],
+            )
 
         with gr.Tab("Funciones de pertenencia"):
             gr.Markdown("### Parametros y visualizacion de funciones de pertenencia")
