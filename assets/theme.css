@@ -458,10 +458,10 @@ body [role="menu"] [aria-selected="true"]:hover,
 .gradio-container .light-dataframe,
 .gradio-container .membership-table {
     background: #ffffff !important;
-    border: 1px solid #bfdbfe !important;
+    border: 1px solid #dbe7e1 !important;
     border-radius: 12px !important;
     overflow: hidden !important;
-    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08) !important;
+    box-shadow: 0 8px 20px rgba(15, 118, 110, 0.08) !important;
 }
 
 .gradio-container .light-dataframe table,
@@ -471,7 +471,7 @@ body [role="menu"] [aria-selected="true"]:hover,
 .gradio-container .light-dataframe [role="grid"],
 .gradio-container .membership-table [role="grid"] {
     background: #ffffff !important;
-    border-color: #bfdbfe !important;
+    border-color: #dbe7e1 !important;
 }
 
 .gradio-container .light-dataframe thead,
@@ -480,9 +480,9 @@ body [role="menu"] [aria-selected="true"]:hover,
 .gradio-container .membership-table th,
 .gradio-container .light-dataframe [role="columnheader"],
 .gradio-container .membership-table [role="columnheader"] {
-    background: #dbeafe !important;
-    color: #1e3a8a !important;
-    border-color: #93c5fd !important;
+    background: #e8f5ed !important;
+    color: #12372a !important;
+    border-color: #c7ded3 !important;
     font-weight: 700 !important;
 }
 
@@ -498,22 +498,22 @@ body [role="menu"] [aria-selected="true"]:hover,
 .gradio-container .membership-table [role="gridcell"] {
     background: #ffffff !important;
     color: #1f2937 !important;
-    border-color: #dbeafe !important;
+    border-color: #dbe7e1 !important;
 }
 
 .gradio-container .light-dataframe tr:nth-child(even) td,
 .gradio-container .membership-table tr:nth-child(even) td,
 .gradio-container .light-dataframe [role="row"]:nth-child(even) [role="gridcell"],
 .gradio-container .membership-table [role="row"]:nth-child(even) [role="gridcell"] {
-    background: #f8fbff !important;
+    background: #f8fbf9 !important;
 }
 
 .gradio-container .light-dataframe tr:hover td,
 .gradio-container .membership-table tr:hover td,
 .gradio-container .light-dataframe [role="row"]:hover [role="gridcell"],
 .gradio-container .membership-table [role="row"]:hover [role="gridcell"] {
-    background: #eff6ff !important;
-    color: #1e3a8a !important;
+    background: #ecfdf5 !important;
+    color: #12372a !important;
 }
 
 .gradio-container .light-dataframe input,
@@ -521,6 +521,122 @@ body [role="menu"] [aria-selected="true"]:hover,
     background: #ffffff !important;
     color: #1f2937 !important;
     border-color: #cbd5e1 !important;
+}
+
+.gradio-container .section-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+    border: 1px solid #dbe7e1 !important;
+    border-radius: 14px !important;
+    padding: 18px !important;
+    margin: 0 0 18px 0 !important;
+    box-shadow: 0 10px 24px rgba(15, 118, 110, 0.07) !important;
+    overflow: visible !important;
+}
+
+.gradio-container .section-card h1,
+.gradio-container .section-card h2,
+.gradio-container .section-card h3,
+.gradio-container .section-card h4 {
+    color: #12372a !important;
+}
+
+.gradio-container .section-card p,
+.gradio-container .section-card li,
+.gradio-container .section-card label,
+.gradio-container .section-card span {
+    color: #334155 !important;
+}
+
+.gradio-container .controls-grid {
+    align-items: end !important;
+    gap: 16px !important;
+    width: 100% !important;
+}
+
+.gradio-container .plot-section,
+.gradio-container .surface-plot-card {
+    overflow-x: auto !important;
+}
+
+.gradio-container .wide-dataframe {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+}
+
+.gradio-container .wide-dataframe .table-wrap,
+.gradio-container .wide-dataframe [role="grid"],
+.gradio-container .wide-dataframe table {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.gradio-container .wide-dataframe .table-wrap,
+.gradio-container .rules-dataframe .table-wrap,
+.gradio-container .rule-viewer-dataframe .table-wrap,
+.gradio-container .history-dataframe .table-wrap {
+    overflow: auto !important;
+}
+
+.gradio-container .wide-dataframe thead th,
+.gradio-container .wide-dataframe [role="columnheader"] {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 2 !important;
+}
+
+.gradio-container .rules-dataframe tr:nth-child(even) td,
+.gradio-container .rule-viewer-dataframe tr:nth-child(even) td,
+.gradio-container .history-dataframe tr:nth-child(even) td {
+    background: #f8fbf9 !important;
+}
+
+.gradio-container .more-menu-card {
+    background: linear-gradient(180deg, #ffffff, #f8fbf9) !important;
+}
+
+.gradio-container .more-section {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    overflow: visible !important;
+}
+
+.gradio-container .surface-panel .surface-fixed-grid {
+    gap: 18px !important;
+    align-items: stretch !important;
+}
+
+.gradio-container .surface-panel input,
+.gradio-container .surface-panel [role="combobox"],
+.gradio-container .rules-panel input,
+.gradio-container .rules-panel [role="combobox"],
+.gradio-container .more-menu-card [role="combobox"] {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 10px !important;
+}
+
+.gradio-container .final-reading {
+    background: linear-gradient(180deg, #ffffff, #ecfdf5) !important;
+    border-color: #b7dccd !important;
+}
+
+.gradio-container button.secondary,
+.gradio-container .section-card button:not([variant="primary"]) {
+    background: #ffffff !important;
+    color: #0f766e !important;
+    border: 1px solid #b7dccd !important;
+}
+
+.gradio-container .section-card button:hover {
+    background: #ecfdf5 !important;
+    border-color: #0f766e !important;
 }
 
 @media (max-width: 760px) {
@@ -532,6 +648,15 @@ body [role="menu"] [aria-selected="true"]:hover,
     .gradio-container .clean-number input[type="number"],
     .gradio-container .number-column input[type="number"] {
         width: 100% !important;
+    }
+
+    .gradio-container .section-card {
+        padding: 14px !important;
+    }
+
+    .gradio-container .controls-grid,
+    .gradio-container .surface-panel .surface-fixed-grid {
+        gap: 12px !important;
     }
 }
 

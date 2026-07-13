@@ -1238,6 +1238,36 @@ def tabla_reglas() -> pd.DataFrame:
     return pd.DataFrame(rules.obtener_tabla_reglas())
 
 
+def opciones_filtro_reglas() -> list[str]:
+    """Devuelve opciones para filtrar la base de reglas por identificador."""
+    return ["Todas"] + [regla.identificador for regla in rules.obtener_reglas_difusas()]
+
+
+def filtrar_tabla_reglas(filtro_regla: str, texto_busqueda: str) -> pd.DataFrame:
+    """Filtra la tabla de reglas por ID y texto libre."""
+    tabla = tabla_reglas()
+    if filtro_regla and filtro_regla != "Todas":
+        tabla = tabla[tabla["id"] == filtro_regla]
+
+    busqueda = (texto_busqueda or "").strip().lower()
+    if busqueda:
+        mascara = tabla.apply(
+            lambda fila: fila.astype(str).str.lower().str.contains(busqueda, regex=False).any(),
+            axis=1,
+        )
+        tabla = tabla[mascara]
+    return tabla
+
+
+def mostrar_seccion_mas(opcion: str) -> tuple[gr.update, gr.update, gr.update]:
+    """Muestra solo la seccion seleccionada dentro del menu Mas."""
+    return (
+        gr.update(visible=opcion == "Surface Viewer"),
+        gr.update(visible=opcion == "Historial"),
+        gr.update(visible=opcion == "Acerca del proyecto"),
+    )
+
+
 def opciones_reglas() -> list[str]:
     """Construye opciones legibles para el visor de reglas."""
     return [f"{regla.identificador} - {regla.texto[:90]}" for regla in rules.obtener_reglas_difusas()]
@@ -1376,6 +1406,23 @@ def construir_resumen_rule_viewer(resultado: dict[str, Any]) -> str:
 """
 
 
+def construir_interpretacion_final_rule_viewer(resultado: dict[str, Any]) -> str:
+    """Construye una interpretacion final breve para el Rule Viewer."""
+    reglas = resultado["reglas_activadas"]
+    regla_maxima = max(reglas, key=lambda regla: regla["grado_activacion"])
+    return f"""
+### Interpretacion final
+El motor Mamdani activo `{len(reglas)}` reglas para este escenario. La regla dominante fue
+`{regla_maxima["id"]}` con un grado de activacion de `{regla_maxima["grado_activacion"]:.4f}`.
+
+Tras recortar los consecuentes, agregarlos mediante MAX y aplicar el centroide, el sistema obtiene:
+
+- Tiempo de riego: `{resultado["tiempo_riego"]:.2f} min`
+- Frecuencia de riego: `{resultado["frecuencia_riego"]:.2f} dias`
+- Caudal de agua: `{resultado["caudal_agua"]:.2f} L/min`
+"""
+
+
 def graficar_rule_viewer(resultado: dict[str, Any]):
     """Crea una figura educativa tipo Rule Viewer con datos reales del motor."""
     reglas = resultado["reglas_activadas"]
@@ -1484,6 +1531,7 @@ def actualizar_rule_viewer(
         construir_tabla_rule_viewer_html(resultado_real),
         graficar_rule_viewer(resultado_real),
         construir_resumen_rule_viewer(resultado_real),
+        construir_interpretacion_final_rule_viewer(resultado_real),
     )
 
 
@@ -1892,143 +1940,215 @@ def crear_interfaz() -> gr.Blocks:
             )
 
         with gr.Tab("Funciones de pertenencia"):
-            gr.Markdown("### Parametros y visualizacion de funciones de pertenencia")
-            with gr.Row():
-                selector_variable = gr.Dropdown(
-                    choices=list(membership.VARIABLES_DIFUSAS.keys()),
-                    value="humedad_suelo",
-                    label="Variable difusa",
-                    filterable=False,
-                    allow_custom_value=False,
-                    buttons=[],
-                )
-                selector_salida_agregada = gr.Dropdown(
-                    choices=list(SALIDAS.keys()),
-                    value="Tiempo de riego",
-                    label="Salida agregada",
-                    filterable=False,
-                    allow_custom_value=False,
-                    buttons=[],
-                )
-            boton_actualizar_graficas = gr.Button("Actualizar graficas con valores ingresados", variant="primary")
-            with gr.Row():
+            with gr.Column(elem_classes=["section-card", "membership-panel"]):
+                gr.Markdown("### Parametros y visualizacion de funciones de pertenencia")
+                with gr.Row(elem_classes=["controls-grid"]):
+                    selector_variable = gr.Dropdown(
+                        choices=list(membership.VARIABLES_DIFUSAS.keys()),
+                        value="humedad_suelo",
+                        label="Variable difusa",
+                        filterable=False,
+                        allow_custom_value=False,
+                        buttons=[],
+                    )
+                    selector_salida_agregada = gr.Dropdown(
+                        choices=list(SALIDAS.keys()),
+                        value="Tiempo de riego",
+                        label="Salida agregada",
+                        filterable=False,
+                        allow_custom_value=False,
+                        buttons=[],
+                    )
+                boton_actualizar_graficas = gr.Button("Actualizar graficas con valores ingresados", variant="primary")
+            with gr.Column(elem_classes=["section-card", "plot-section"]):
                 grafico_membresia = gr.Plot(label="Funciones de pertenencia")
+            with gr.Column(elem_classes=["section-card", "plot-section"]):
                 grafico_salida_agregada = gr.Plot(label="Salida agregada")
-            gr.Dataframe(
-                value=tabla_funciones_pertenencia,
-                interactive=False,
-                wrap=True,
-                max_height=430,
-                show_row_numbers=False,
-                elem_classes=["light-dataframe", "membership-table"],
-            )
+            with gr.Column(elem_classes=["section-card"]):
+                gr.Markdown("### Tabla de parametros")
+                gr.Dataframe(
+                    value=tabla_funciones_pertenencia,
+                    interactive=False,
+                    wrap=True,
+                    max_height=620,
+                    show_row_numbers=False,
+                    elem_classes=["light-dataframe", "wide-dataframe", "membership-table"],
+                )
+            with gr.Column(elem_classes=["section-card", "math-note"]):
+                gr.Markdown(
+                    """
+### Explicacion matematica
+Las funciones trapezoidales se usan en los extremos para cubrir los limites del universo sin huecos.
+Las funciones triangulares se usan en conjuntos intermedios para representar transiciones graduales.
+
+Para una funcion triangular se evalua la subida hasta el punto central y luego la bajada hacia el limite superior.
+Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el grado es 1.
+"""
+                )
 
         with gr.Tab("Base de reglas"):
-            gr.Markdown("### Base de reglas Mamdani")
-            gr.Dataframe(value=tabla_reglas, interactive=False, wrap=True)
+            with gr.Column(elem_classes=["section-card", "rules-panel"]):
+                gr.Markdown("### Base de reglas Mamdani")
+                with gr.Row(elem_classes=["controls-grid"]):
+                    filtro_regla = gr.Dropdown(
+                        choices=opciones_filtro_reglas(),
+                        value="Todas",
+                        label="Filtrar por regla",
+                        filterable=False,
+                        allow_custom_value=False,
+                        buttons=[],
+                    )
+                    busqueda_reglas = gr.Textbox(
+                        label="Buscar",
+                        placeholder="Buscar por antecedente, consecuente o explicacion",
+                    )
+                tabla_base_reglas = gr.Dataframe(
+                    value=tabla_reglas,
+                    interactive=False,
+                    wrap=True,
+                    max_height=650,
+                    show_row_numbers=False,
+                    elem_classes=["light-dataframe", "wide-dataframe", "rules-dataframe"],
+                )
 
         with gr.Tab("Rule Viewer"):
-            gr.Markdown("### Rule Viewer educativo tipo Mamdani")
-            gr.Markdown(
-                "El visor usa el ultimo resultado real calculado por `fuzzy_engine.py`: "
-                "fuzzificacion, reglas activadas, recortes Mamdani, agregacion y centroide."
-            )
-            boton_actualizar_rule_viewer = gr.Button("Actualizar Rule Viewer", variant="primary")
-            with gr.Row():
+            with gr.Column(elem_classes=["section-card", "rule-viewer-panel"]):
+                gr.Markdown("### Rule Viewer educativo tipo Mamdani")
+                gr.Markdown(
+                    "El visor usa el ultimo resultado real calculado por `fuzzy_engine.py`: "
+                    "fuzzificacion, reglas activadas, recortes Mamdani, agregacion y centroide."
+                )
+                boton_actualizar_rule_viewer = gr.Button("Actualizar Rule Viewer", variant="primary")
+            with gr.Column(elem_classes=["section-card"]):
                 rule_viewer_entradas = gr.Markdown("Ejecute una evaluacion para ver las entradas.")
-                rule_viewer_resumen = gr.Markdown("Ejecute una evaluacion para ver el resumen.")
-            with gr.Row():
+            with gr.Column(elem_classes=["section-card"]):
+                gr.Markdown("### Grados de pertenencia")
                 rule_viewer_grados = gr.Markdown("Ejecute una evaluacion para ver los grados de pertenencia.")
+            with gr.Column(elem_classes=["section-card"]):
+                rule_viewer_resumen = gr.Markdown("Ejecute una evaluacion para ver la lectura educativa.")
+            with gr.Column(elem_classes=["section-card"]):
+                gr.Markdown("### Tabla de reglas activadas")
+                rule_viewer_tabla = gr.Dataframe(
+                    headers=[
+                        "ID de regla",
+                        "Regla linguistica",
+                        "Grado de activacion",
+                        "Tiempo de riego",
+                        "Frecuencia",
+                        "Caudal",
+                    ],
+                    interactive=False,
+                    wrap=True,
+                    max_height=560,
+                    show_row_numbers=False,
+                    elem_classes=["light-dataframe", "wide-dataframe", "rule-viewer-dataframe"],
+                )
+                rule_viewer_tabla_html = gr.HTML(visible=False)
+            with gr.Column(elem_classes=["section-card"]):
+                gr.Markdown("### Visor individual de reglas")
+                selector_regla = gr.Dropdown(
+                    choices=opciones_reglas(),
+                    label="Regla",
+                    filterable=False,
+                    allow_custom_value=False,
+                    buttons=[],
+                )
+                detalle_regla = gr.Markdown("Seleccione una regla para ver sus antecedentes y consecuentes.")
+            with gr.Column(elem_classes=["section-card", "plot-section"]):
+                gr.Markdown("### Graficos")
                 rule_viewer_grafico = gr.Plot(label="Rule Viewer Mamdani")
-            gr.Markdown("### Tabla de reglas activadas")
-            rule_viewer_tabla = gr.Dataframe(
-                headers=[
-                    "ID de regla",
-                    "Regla linguistica",
-                    "Grado de activacion",
-                    "Tiempo de riego",
-                    "Frecuencia",
-                    "Caudal",
-                ],
-                interactive=False,
-                wrap=True,
-            )
-            rule_viewer_tabla_html = gr.HTML()
-            gr.Markdown("### Visor individual de reglas")
-            selector_regla = gr.Dropdown(
-                choices=opciones_reglas(),
-                label="Regla",
-                filterable=False,
-                allow_custom_value=False,
-                buttons=[],
-            )
-            detalle_regla = gr.Markdown("Seleccione una regla para ver sus antecedentes y consecuentes.")
+            with gr.Column(elem_classes=["section-card", "final-reading"]):
+                rule_viewer_interpretacion = gr.Markdown("Ejecute una evaluacion para ver la interpretacion final.")
 
-        with gr.Tab("Surface Viewer"):
-            gr.Markdown("### Surface Viewer 3D")
-            gr.Markdown(
-                "Cada punto de la malla se calcula con `fuzzy_engine.py`; no se usan "
-                "formulas simplificadas ni valores inventados."
-            )
-            with gr.Row():
-                superficie_surface = gr.Dropdown(
-                    list(SUPERFICIES_3D.keys()),
-                    value="Humedad del suelo vs temperatura ambiental -> tiempo de riego",
-                    label="Superficie",
+        with gr.Tab("▼ Más"):
+            with gr.Column(elem_classes=["section-card", "more-menu-card"]):
+                selector_mas = gr.Dropdown(
+                    choices=["Surface Viewer", "Historial", "Acerca del proyecto"],
+                    value="Surface Viewer",
+                    label="Seleccionar seccion",
                     filterable=False,
                     allow_custom_value=False,
                     buttons=[],
                 )
-                cultivo_surface = gr.Dropdown(
-                    CULTIVOS,
-                    value="Tomate",
-                    label="Cultivo",
-                    filterable=False,
-                    allow_custom_value=False,
-                    buttons=[],
-                )
-            with gr.Row():
-                humedad_suelo_surface = gr.Slider(0, 100, value=35, step=1, label="Humedad del suelo fija (%)")
-                temperatura_surface = gr.Slider(0, 45, value=28, step=0.5, label="Temperatura fija (C)")
-            with gr.Row():
-                humedad_surface = gr.Slider(0, 100, value=55, step=1, label="Humedad ambiental fija (%)")
-                viento_surface = gr.Slider(0, 40, value=12, step=0.5, label="Viento fijo (km/h)")
-            resolucion_surface = gr.Slider(
-                10,
-                25,
-                value=15,
-                step=1,
-                label="Resolucion de malla por eje",
-            )
-            boton_surface = gr.Button("Actualizar superficie", variant="primary")
-            grafico_surface = gr.Plot()
-            archivo_surface = gr.File(label="Descargar imagen PNG")
-            resumen_surface = gr.Textbox(label="Resumen del calculo", interactive=False, lines=3)
 
-        with gr.Tab("Historial"):
-            gr.Markdown("### Historial de evaluaciones")
-            with gr.Row():
-                boton_guardar_historial = gr.Button("Guardar evaluacion", variant="primary")
-                boton_descargar_historial = gr.Button("Descargar historial CSV")
-                boton_limpiar_historial = gr.Button("Limpiar historial")
-            mensaje_historial = gr.Textbox(label="Estado del historial", interactive=False)
-            tabla_historial = gr.Dataframe(value=cargar_tabla_historial, interactive=False, wrap=True)
-            archivo_historial = gr.File(label="Archivo CSV")
-            gr.Markdown(
-                "En servicios web como Render el almacenamiento puede reiniciarse segun el plan. "
-                "Descargue el historial CSV si desea conservarlo."
-            )
+            with gr.Column(elem_classes=["more-section"], visible=True) as seccion_surface:
+                with gr.Column(elem_classes=["section-card", "surface-panel"]):
+                    gr.Markdown("### Surface Viewer 3D")
+                    gr.Markdown(
+                        "Cada punto de la malla se calcula con `fuzzy_engine.py`; no se usan "
+                        "formulas simplificadas ni valores inventados."
+                    )
+                    with gr.Row(elem_classes=["controls-grid"]):
+                        superficie_surface = gr.Dropdown(
+                            list(SUPERFICIES_3D.keys()),
+                            value="Humedad del suelo vs temperatura ambiental -> tiempo de riego",
+                            label="Superficie",
+                            filterable=False,
+                            allow_custom_value=False,
+                            buttons=[],
+                        )
+                        cultivo_surface = gr.Dropdown(
+                            CULTIVOS,
+                            value="Tomate",
+                            label="Cultivo",
+                            filterable=False,
+                            allow_custom_value=False,
+                            buttons=[],
+                        )
+                    with gr.Row(elem_classes=["surface-fixed-grid"]):
+                        with gr.Column():
+                            humedad_suelo_surface = gr.Slider(0, 100, value=35, step=1, label="Humedad del suelo fija (%)")
+                            temperatura_surface = gr.Slider(0, 45, value=28, step=0.5, label="Temperatura fija (C)")
+                        with gr.Column():
+                            humedad_surface = gr.Slider(0, 100, value=55, step=1, label="Humedad ambiental fija (%)")
+                            viento_surface = gr.Slider(0, 40, value=12, step=0.5, label="Viento fijo (km/h)")
+                    resolucion_surface = gr.Slider(
+                        10,
+                        25,
+                        value=15,
+                        step=1,
+                        label="Resolucion de malla por eje",
+                    )
+                    boton_surface = gr.Button("Actualizar superficie", variant="primary")
+                with gr.Column(elem_classes=["section-card", "plot-section", "surface-plot-card"]):
+                    grafico_surface = gr.Plot()
+                    archivo_surface = gr.File(label="Descargar imagen PNG")
+                with gr.Column(elem_classes=["section-card"]):
+                    resumen_surface = gr.Textbox(label="Resumen del calculo", interactive=False, lines=3)
 
-        with gr.Tab("Acerca del proyecto"):
-            gr.Markdown(
-                """
-## Diseño de un Sistema Inteligente para el Riego Automático mediante Lógica Difusa Mamdani
+            with gr.Column(elem_classes=["more-section"], visible=False) as seccion_historial:
+                with gr.Column(elem_classes=["section-card", "history-panel"]):
+                    gr.Markdown("### Historial de evaluaciones")
+                    with gr.Row(elem_classes=["controls-grid"]):
+                        boton_guardar_historial = gr.Button("Guardar evaluacion", variant="primary")
+                        boton_descargar_historial = gr.Button("Descargar historial CSV")
+                        boton_limpiar_historial = gr.Button("Limpiar historial")
+                    mensaje_historial = gr.Textbox(label="Estado del historial", interactive=False)
+                    tabla_historial = gr.Dataframe(
+                        value=cargar_tabla_historial,
+                        interactive=False,
+                        wrap=True,
+                        max_height=560,
+                        show_row_numbers=False,
+                        elem_classes=["light-dataframe", "wide-dataframe", "history-dataframe"],
+                    )
+                    archivo_historial = gr.File(label="Archivo CSV")
+                    gr.Markdown(
+                        "En servicios web como Render el almacenamiento puede reiniciarse segun el plan. "
+                        "Descargue el historial CSV si desea conservarlo."
+                    )
 
-### Datos académicos
-**Universidad:** Universidad César Vallejo  
-**Escuela:** Ingeniería de Sistemas  
-**Curso:** Sistemas Inteligentes  
-**Unidad:** Unidad 3  
+            with gr.Column(elem_classes=["more-section"], visible=False) as seccion_acerca:
+                with gr.Column(elem_classes=["section-card", "about-panel"]):
+                    gr.Markdown(
+                        """
+## Dise?o de un Sistema Inteligente para el Riego Autom?tico mediante L?gica Difusa Mamdani
+
+### Datos acad?micos
+**Universidad:** Universidad C?sar Vallejo
+**Escuela:** Ingenier?a de Sistemas
+**Curso:** Sistemas Inteligentes
+**Unidad:** Unidad 3
 **Asesor:** Tito Chura, Virgilio Fredy
 
 ### Autores
@@ -2038,24 +2158,23 @@ def crear_interfaz() -> gr.Blocks:
 - Warthon Arratea, Sharonn Nicolle
 
 ### Enfoque ODS
-**ODS 6:** Agua limpia y saneamiento  
-**Meta 6.4:** uso eficiente de los recursos hídricos
+**ODS 6:** Agua limpia y saneamiento
+**Meta 6.4:** uso eficiente de los recursos h?dricos
 
-### Líneas académicas
-**Línea de investigación:** Sistemas de Información y Comunicación  
-**Línea de responsabilidad social universitaria:** Desarrollo sostenible y adaptación al cambio climático
+### L?neas acad?micas
+**L?nea de investigaci?n:** Sistemas de Informaci?n y Comunicaci?n
+**L?nea de responsabilidad social universitaria:** Desarrollo sostenible y adaptaci?n al cambio clim?tico
 
-### Explicación breve del sistema
-El sistema evalúa condiciones agrícolas como humedad del suelo, temperatura ambiental, humedad ambiental, velocidad del viento y tipo de cultivo. Con estas entradas calcula recomendaciones de tiempo de riego, frecuencia de riego y caudal de agua, buscando apoyar un uso más eficiente del recurso hídrico.
+### Explicaci?n breve del sistema
+El sistema eval?a condiciones agr?colas como humedad del suelo, temperatura ambiental, humedad ambiental, velocidad del viento y tipo de cultivo. Con estas entradas calcula recomendaciones de tiempo de riego, frecuencia de riego y caudal de agua, buscando apoyar un uso m?s eficiente del recurso h?drico.
 
-### Método Mamdani
-El método Mamdani transforma valores numéricos en grados de pertenencia difusos, evalúa reglas lingüísticas del tipo SI...ENTONCES, recorta los consecuentes según el grado de activación, agrega las salidas con el operador máximo y obtiene valores finales mediante desfuzzificación por centroide.
+### M?todo Mamdani
+El m?todo Mamdani transforma valores num?ricos en grados de pertenencia difusos, eval?a reglas ling??sticas del tipo SI...ENTONCES, recorta los consecuentes seg?n el grado de activaci?n, agrega las salidas con el operador m?ximo y obtiene valores finales mediante desfuzzificaci?n por centroide.
 
-### Tecnologías utilizadas
-Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementada en CPU.
+### Tecnolog?as utilizadas
+Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementada en CPU.
 """
-            )
-
+                    )
         entradas = [humedad_suelo, temperatura, humedad_ambiental, velocidad_viento, tipo_cultivo]
         salidas_calculo = [
             salida_tiempo,
@@ -2072,6 +2191,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             rule_viewer_tabla_html,
             rule_viewer_grafico,
             rule_viewer_resumen,
+            rule_viewer_interpretacion,
         ]
         humedad_suelo.release(
             fn=lambda valor: limitar_valor_control(valor, 0, 100, 0),
@@ -2123,6 +2243,21 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             fn=actualizar_rule_viewer,
             inputs=[resultado_estado, *entradas],
             outputs=salidas_rule_viewer,
+        )
+        selector_mas.change(
+            fn=mostrar_seccion_mas,
+            inputs=selector_mas,
+            outputs=[seccion_surface, seccion_historial, seccion_acerca],
+        )
+        filtro_regla.change(
+            fn=filtrar_tabla_reglas,
+            inputs=[filtro_regla, busqueda_reglas],
+            outputs=tabla_base_reglas,
+        )
+        busqueda_reglas.change(
+            fn=filtrar_tabla_reglas,
+            inputs=[filtro_regla, busqueda_reglas],
+            outputs=tabla_base_reglas,
         )
         boton_guardar_historial.click(
             fn=guardar_evaluacion_historial,
