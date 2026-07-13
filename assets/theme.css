@@ -831,6 +831,149 @@ body [role="menu"] [aria-selected="true"]:hover,
     font-weight: 800 !important;
 }
 
+.gradio-container .rule-viewer-html-table,
+.gradio-container .rule-viewer-html-table * ,
+.gradio-container .rule-viewer-combobox,
+.gradio-container .rule-viewer-combobox * {
+    overflow: visible !important;
+}
+
+.gradio-container .rule-viewer-combobox {
+    position: relative !important;
+    z-index: 6000 !important;
+}
+
+.gradio-container .rule-viewer-combobox [role="combobox"],
+.gradio-container .rule-viewer-combobox input {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #d7d2e8 !important;
+    border-radius: 10px !important;
+    min-height: 42px !important;
+    box-shadow: none !important;
+}
+
+.gradio-container .rule-viewer-combobox [role="listbox"],
+.gradio-container .rule-viewer-combobox .options,
+.gradio-container .rule-viewer-combobox .dropdown-options {
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-height: 300px !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+    border: 1px solid #d7d2e8 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 16px 34px rgba(88, 70, 140, 0.16) !important;
+    z-index: 100000 !important;
+}
+
+.gradio-container .rule-viewer-combobox [role="option"] {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+    border-radius: 10px !important;
+}
+
+.gradio-container .rule-viewer-combobox [role="option"]:hover,
+.gradio-container .rule-viewer-combobox [role="option"][aria-selected="true"] {
+    background: #f3eeff !important;
+    color: #1f2937 !important;
+}
+
+.gradio-container .rule-viewer-table-shell {
+    width: 95% !important;
+    max-width: 95% !important;
+    margin: 12px auto 0 auto !important;
+    background: #ffffff !important;
+    border: 1px solid #d9d6e3 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 24px rgba(88, 70, 140, 0.08) !important;
+    overflow: hidden !important;
+}
+
+.gradio-container .rule-viewer-table-scroll {
+    width: 100% !important;
+    min-height: 320px !important;
+    max-height: 560px !important;
+    overflow-y: auto !important;
+    overflow-x: auto !important;
+}
+
+.gradio-container .excel-rule-viewer-table {
+    width: 100% !important;
+    min-width: 1060px !important;
+    border-collapse: collapse !important;
+    table-layout: fixed !important;
+    font-size: 14px !important;
+}
+
+.gradio-container .excel-rule-viewer-table th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
+    background: #f3eeff !important;
+    color: #1e2a44 !important;
+    border: 1px solid #d9d6e3 !important;
+    padding: 14px 16px !important;
+    text-align: left !important;
+    font-weight: 800 !important;
+    line-height: 1.25 !important;
+}
+
+.gradio-container .excel-rule-viewer-table td {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 13px 16px !important;
+    text-align: left !important;
+    vertical-align: top !important;
+    line-height: 1.45 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
+}
+
+.gradio-container .excel-rule-viewer-table th:nth-child(1),
+.gradio-container .excel-rule-viewer-table td:nth-child(1) {
+    width: 90px !important;
+}
+
+.gradio-container .excel-rule-viewer-table th:nth-child(2),
+.gradio-container .excel-rule-viewer-table td:nth-child(2) {
+    width: 430px !important;
+}
+
+.gradio-container .excel-rule-viewer-table th:nth-child(3),
+.gradio-container .excel-rule-viewer-table td:nth-child(3) {
+    width: 150px !important;
+}
+
+.gradio-container .excel-rule-viewer-table th:nth-child(4),
+.gradio-container .excel-rule-viewer-table td:nth-child(4),
+.gradio-container .excel-rule-viewer-table th:nth-child(5),
+.gradio-container .excel-rule-viewer-table td:nth-child(5),
+.gradio-container .excel-rule-viewer-table th:nth-child(6),
+.gradio-container .excel-rule-viewer-table td:nth-child(6) {
+    width: 130px !important;
+}
+
+.gradio-container .excel-rule-viewer-table tbody tr:nth-child(even) td {
+    background: #fbf9ff !important;
+}
+
+.gradio-container .excel-rule-viewer-table tbody tr:hover td {
+    background: #efe7ff !important;
+    color: #1f2937 !important;
+}
+
+.gradio-container .excel-rule-viewer-table tbody tr.rule-max td {
+    background: #f7f2ff !important;
+    font-weight: 700 !important;
+}
+
 .gradio-container .controls-grid {
     align-items: end !important;
     gap: 16px !important;

@@ -764,13 +764,24 @@ def ejecutar_calculo(
 
 
 def formatear_diccionario_grados(grados: dict[str, dict[str, float]]) -> str:
-    """Convierte grados de pertenencia en Markdown."""
+    """Convierte grados de pertenencia en Markdown ordenado por variable."""
+    orden_variables = [
+        "humedad_suelo",
+        "temperatura_ambiental",
+        "humedad_ambiental",
+        "velocidad_viento",
+        "tipo_cultivo",
+    ]
     lineas = []
-    for variable, conjuntos in grados.items():
-        lineas.append(f"**{variable}**")
+    for variable in orden_variables:
+        conjuntos = grados.get(variable, {})
+        if not conjuntos:
+            continue
+        lineas.append(f"### {NOMBRES_ENTRADAS.get(variable, variable)}")
         for conjunto, grado in conjuntos.items():
-            lineas.append(f"- {conjunto}: `{grado:.4f}`")
-    return "\n".join(lineas)
+            lineas.append(f"- {formatear_texto_regla(conjunto)} → `{grado:.4f}`")
+        lineas.append("")
+    return "\n".join(lineas).strip()
 
 
 NOMBRES_ENTRADAS = {
@@ -1386,7 +1397,7 @@ def mostrar_seccion_mas(opcion: str) -> tuple[gr.update, gr.update, gr.update]:
 
 def opciones_reglas() -> list[str]:
     """Construye opciones legibles para el visor de reglas."""
-    return [f"{regla.identificador} - {regla.texto[:90]}" for regla in rules.obtener_reglas_difusas()]
+    return [regla.identificador for regla in rules.obtener_reglas_difusas()]
 
 
 def ver_regla(opcion: str) -> str:
@@ -1397,7 +1408,8 @@ def ver_regla(opcion: str) -> str:
     for regla in rules.obtener_reglas_difusas():
         if regla.identificador == identificador:
             antecedentes = "\n".join(
-                f"- {antecedente.variable}: `{antecedente.conjunto}`"
+                f"- {NOMBRES_VARIABLES_REGLAS.get(antecedente.variable, antecedente.variable)}: "
+                f"`{formatear_texto_regla(antecedente.conjunto)}`"
                 for antecedente in regla.antecedentes
             )
             return f"""
@@ -1409,9 +1421,9 @@ def ver_regla(opcion: str) -> str:
 {antecedentes}
 
 **Consecuentes**
-- tiempo_riego: `{regla.consecuentes.tiempo_riego}`
-- frecuencia_riego: `{regla.consecuentes.frecuencia_riego}`
-- caudal_agua: `{regla.consecuentes.caudal_agua}`
+- Tiempo de riego: `{formatear_texto_regla(regla.consecuentes.tiempo_riego)}`
+- Frecuencia: `{formatear_texto_regla(regla.consecuentes.frecuencia_riego)}`
+- Caudal: `{formatear_texto_regla(regla.consecuentes.caudal_agua)}`
 
 **Regla legible**
 {rules.convertir_regla_a_texto(regla)}
@@ -1465,26 +1477,32 @@ def construir_tabla_rule_viewer(resultado: dict[str, Any]) -> pd.DataFrame:
 
 
 def construir_tabla_rule_viewer_html(resultado: dict[str, Any]) -> str:
-    """Construye una tabla HTML con resaltado de reglas de mayor activacion."""
+    """Construye una tabla HTML amplia con las reglas activadas."""
     tabla = construir_tabla_rule_viewer(resultado)
     if tabla.empty:
         return "<p>No hay reglas activadas.</p>"
 
     maximo = float(tabla["Grado de activacion"].max())
-    encabezados = "".join(f"<th>{columna}</th>" for columna in tabla.columns)
+    encabezados = "".join(f"<th>{html.escape(columna)}</th>" for columna in tabla.columns)
     filas_html = []
     for _, fila in tabla.iterrows():
         clase = " class='rule-max'" if float(fila["Grado de activacion"]) == maximo else ""
-        celdas = "".join(f"<td>{fila[columna]}</td>" for columna in tabla.columns)
+        celdas = "".join(
+            f"<td>{html.escape(str(fila[columna]))}</td>"
+            for columna in tabla.columns
+        )
         filas_html.append(f"<tr{clase}>{celdas}</tr>")
 
-    return (
-        "<div class='texto-suave'>Las filas azules corresponden a la mayor activacion.</div>"
-        "<table class='rule-table'>"
-        f"<thead><tr>{encabezados}</tr></thead>"
-        f"<tbody>{''.join(filas_html)}</tbody>"
-        "</table>"
-    )
+    return f"""
+<div class="rule-viewer-table-shell">
+    <div class="rule-viewer-table-scroll" role="region" aria-label="Tabla de reglas activadas">
+        <table class="excel-rule-viewer-table">
+            <thead><tr>{encabezados}</tr></thead>
+            <tbody>{''.join(filas_html)}</tbody>
+        </table>
+    </div>
+</div>
+"""
 
 
 def construir_entradas_rule_viewer(
@@ -1643,7 +1661,6 @@ def actualizar_rule_viewer(
             tipo_cultivo,
         ),
         formatear_diccionario_grados(resultado_real["grados_pertenencia"]),
-        construir_tabla_rule_viewer(resultado_real),
         construir_tabla_rule_viewer_html(resultado_real),
         graficar_rule_viewer(resultado_real),
         construir_resumen_rule_viewer(resultado_real),
@@ -2129,30 +2146,20 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                 rule_viewer_resumen = gr.Markdown("Ejecute una evaluacion para ver la lectura educativa.")
             with gr.Column(elem_classes=["section-card"]):
                 gr.Markdown("### Tabla de reglas activadas")
-                rule_viewer_tabla = gr.Dataframe(
-                    headers=[
-                        "ID de regla",
-                        "Regla linguistica",
-                        "Grado de activacion",
-                        "Tiempo de riego",
-                        "Frecuencia",
-                        "Caudal",
-                    ],
-                    interactive=False,
-                    wrap=True,
-                    max_height=560,
-                    show_row_numbers=False,
-                    elem_classes=["light-dataframe", "wide-dataframe", "rule-viewer-dataframe"],
+                rule_viewer_tabla = gr.HTML(
+                    value="<p>Ejecute una evaluacion para ver las reglas activadas.</p>",
+                    elem_classes=["rule-viewer-html-table"],
                 )
-                rule_viewer_tabla_html = gr.HTML(visible=False)
             with gr.Column(elem_classes=["section-card"]):
                 gr.Markdown("### Visor individual de reglas")
                 selector_regla = gr.Dropdown(
                     choices=opciones_reglas(),
+                    value="R01",
                     label="Regla",
                     filterable=False,
                     allow_custom_value=False,
                     buttons=[],
+                    elem_classes=["rule-viewer-combobox"],
                 )
                 detalle_regla = gr.Markdown("Seleccione una regla para ver sus antecedentes y consecuentes.")
             with gr.Column(elem_classes=["section-card", "plot-section"]):
@@ -2289,7 +2296,6 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementad
             rule_viewer_entradas,
             rule_viewer_grados,
             rule_viewer_tabla,
-            rule_viewer_tabla_html,
             rule_viewer_grafico,
             rule_viewer_resumen,
             rule_viewer_interpretacion,
