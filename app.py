@@ -25,6 +25,7 @@ import rules
 
 TITULO = "Sistema Inteligente para el Riego Automatico mediante Logica Difusa Mamdani"
 RUTA_HISTORIAL = Path("data") / "historial.csv"
+RUTA_CSS_TEMA = Path("assets") / "theme.css"
 CULTIVOS = ["Lechuga", "Tomate", "Maíz", "Papa", "Fresa"]
 SALIDAS = {
     "Tiempo de riego": "tiempo_riego",
@@ -507,6 +508,15 @@ button.primary span,
 """
 
 
+def cargar_css() -> str:
+    """Carga el CSS base y las reglas visuales externas del proyecto."""
+    try:
+        css_tema = RUTA_CSS_TEMA.read_text(encoding="utf-8")
+    except OSError:
+        css_tema = ""
+    return f"{CSS}\n{css_tema}"
+
+
 def formatear_tarjeta(etiqueta: str, valor: str, unidad: str) -> str:
     """Crea una tarjeta HTML compacta para resultados."""
     return (
@@ -516,6 +526,58 @@ def formatear_tarjeta(etiqueta: str, valor: str, unidad: str) -> str:
         f"<div class='texto-suave'>{unidad}</div>"
         "</div>"
     )
+
+
+def limitar_valor_control(valor: float | int | None, minimo: float, maximo: float, decimales: int) -> float:
+    """Normaliza un valor de Slider/Number dentro del rango permitido."""
+    if valor is None:
+        return float(minimo)
+    try:
+        valor_normalizado = float(valor)
+    except (TypeError, ValueError):
+        valor_normalizado = float(minimo)
+    valor_limitado = min(max(valor_normalizado, minimo), maximo)
+    return round(valor_limitado, decimales)
+
+
+def crear_control_numerico(
+    titulo: str,
+    minimo: float,
+    maximo: float,
+    valor: float,
+    paso: float,
+    decimales: int,
+) -> tuple[gr.Slider, gr.Number]:
+    """Crea una fila limpia con titulo, slider y caja numerica sincronizable."""
+    with gr.Column(elem_classes=["input-card"]):
+        gr.HTML(f"<div class='field-title'>{titulo}</div>")
+        with gr.Row(elem_classes=["slider-row"]):
+            with gr.Column(scale=8, min_width=220, elem_classes=["slider-column"]):
+                slider = gr.Slider(
+                    minimum=minimo,
+                    maximum=maximo,
+                    value=valor,
+                    step=paso,
+                    show_label=False,
+                    elem_classes=["clean-slider"],
+                )
+                gr.HTML(
+                    "<div class='range-hints'>"
+                    f"<span>{minimo:g}</span>"
+                    f"<span>{maximo:g}</span>"
+                    "</div>"
+                )
+            with gr.Column(scale=2, min_width=110, elem_classes=["number-column"]):
+                numero = gr.Number(
+                    value=valor,
+                    show_label=False,
+                    minimum=minimo,
+                    maximum=maximo,
+                    step=paso,
+                    precision=decimales,
+                    elem_classes=["clean-number"],
+                )
+    return slider, numero
 
 
 def estado_proceso(etapa: str) -> str:
@@ -1214,11 +1276,26 @@ def crear_interfaz() -> gr.Blocks:
             gr.Markdown("### Ingrese las condiciones actuales del cultivo")
             with gr.Row():
                 with gr.Column(scale=1):
-                    humedad_suelo = gr.Slider(0, 100, value=35, step=1, label="Humedad del suelo (%)")
-                    temperatura = gr.Slider(0, 45, value=28, step=0.5, label="Temperatura ambiental (C)")
-                    humedad_ambiental = gr.Slider(0, 100, value=55, step=1, label="Humedad ambiental (%)")
-                    velocidad_viento = gr.Slider(0, 40, value=12, step=0.5, label="Velocidad del viento (km/h)")
-                    tipo_cultivo = gr.Dropdown(CULTIVOS, value="Tomate", label="Tipo de cultivo")
+                    humedad_suelo, humedad_suelo_numero = crear_control_numerico(
+                        "Humedad del suelo (%)", 0, 100, 35, 1, 0
+                    )
+                    temperatura, temperatura_numero = crear_control_numerico(
+                        "Temperatura ambiental (C)", 0, 45, 28, 0.5, 1
+                    )
+                    humedad_ambiental, humedad_ambiental_numero = crear_control_numerico(
+                        "Humedad ambiental (%)", 0, 100, 55, 1, 0
+                    )
+                    velocidad_viento, velocidad_viento_numero = crear_control_numerico(
+                        "Velocidad del viento (km/h)", 0, 40, 12, 0.5, 1
+                    )
+                    with gr.Column(elem_classes=["input-card"]):
+                        gr.HTML("<div class='field-title'>Tipo de cultivo</div>")
+                        tipo_cultivo = gr.Dropdown(
+                            CULTIVOS,
+                            value="Tomate",
+                            show_label=False,
+                            elem_classes=["clean-dropdown"],
+                        )
                     boton_calcular = gr.Button("Calcular riego inteligente", variant="primary")
                     boton_procedimiento = gr.Button("Ver procedimiento Mamdani paso a paso")
                     boton_reporte_pdf = gr.Button("Descargar reporte PDF")
@@ -1393,6 +1470,46 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             rule_viewer_grafico,
             rule_viewer_resumen,
         ]
+        humedad_suelo.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 100, 0),
+            inputs=humedad_suelo,
+            outputs=humedad_suelo_numero,
+        )
+        humedad_suelo_numero.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 100, 0),
+            inputs=humedad_suelo_numero,
+            outputs=humedad_suelo,
+        )
+        temperatura.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 45, 1),
+            inputs=temperatura,
+            outputs=temperatura_numero,
+        )
+        temperatura_numero.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 45, 1),
+            inputs=temperatura_numero,
+            outputs=temperatura,
+        )
+        humedad_ambiental.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 100, 0),
+            inputs=humedad_ambiental,
+            outputs=humedad_ambiental_numero,
+        )
+        humedad_ambiental_numero.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 100, 0),
+            inputs=humedad_ambiental_numero,
+            outputs=humedad_ambiental,
+        )
+        velocidad_viento.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 40, 1),
+            inputs=velocidad_viento,
+            outputs=velocidad_viento_numero,
+        )
+        velocidad_viento_numero.change(
+            fn=lambda valor: limitar_valor_control(valor, 0, 40, 1),
+            inputs=velocidad_viento_numero,
+            outputs=velocidad_viento,
+        )
         evento_calculo = boton_calcular.click(fn=ejecutar_calculo, inputs=entradas, outputs=salidas_calculo)
         evento_calculo.then(
             fn=actualizar_rule_viewer,
@@ -1502,4 +1619,4 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
 if __name__ == "__main__":
     demo = crear_interfaz()
     port = int(os.environ.get("PORT", 7860))
-    demo.launch(server_name="0.0.0.0", server_port=port, css=CSS, theme=crear_tema_claro())
+    demo.launch(server_name="0.0.0.0", server_port=port, css=cargar_css(), theme=crear_tema_claro())
