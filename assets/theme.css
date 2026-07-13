@@ -287,6 +287,106 @@ body .svelte-select-list div:hover {
     color: #12372a !important;
 }
 
+/* Pestañas visibles: caja estable para que no cambien de tamaño al seleccionarlas. */
+.gradio-container .tab-nav > button,
+.gradio-container .tabs > button,
+.gradio-container button[role="tab"] {
+    box-sizing: border-box !important;
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 16px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 3px solid transparent !important;
+    border-radius: 8px 8px 0 0 !important;
+    background: transparent !important;
+    color: #1e3a8a !important;
+    font-weight: 600 !important;
+    line-height: 1 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.gradio-container .tab-nav > button[aria-selected="true"],
+.gradio-container .tabs > button[aria-selected="true"],
+.gradio-container button[role="tab"][aria-selected="true"] {
+    height: 44px !important;
+    min-height: 44px !important;
+    padding: 0 16px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 3px solid #0f766e !important;
+    background: transparent !important;
+    color: #0f766e !important;
+    font-weight: 600 !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Opciones dentro del menu de tres puntos: no deben heredar estilo azul de tab activo. */
+body [role="menu"] [role="tab"],
+body [role="menu"] button,
+body [role="menu"] button[aria-selected="true"],
+body [role="menu"] [aria-selected="true"],
+.gradio-container .tab-nav [role="menu"] [role="tab"],
+.gradio-container .tab-nav [role="menu"] button,
+.gradio-container .tab-nav ul [role="tab"],
+.gradio-container .tab-nav ul button,
+.gradio-container .tabs [role="menu"] [role="tab"],
+.gradio-container .tabs [role="menu"] button,
+.gradio-container .tabs ul [role="tab"],
+.gradio-container .tabs ul button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 12px !important;
+    margin: 0 !important;
+    border: 0 !important;
+    border-bottom: 0 !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    font-weight: 600 !important;
+    line-height: 1.2 !important;
+    text-align: left !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+body [role="menu"] [role="tab"] *,
+body [role="menu"] button *,
+body [role="menu"] button[aria-selected="true"] *,
+body [role="menu"] [aria-selected="true"] *,
+.gradio-container .tab-nav [role="menu"] [role="tab"] *,
+.gradio-container .tab-nav [role="menu"] button *,
+.gradio-container .tab-nav ul [role="tab"] *,
+.gradio-container .tab-nav ul button *,
+.gradio-container .tabs [role="menu"] [role="tab"] *,
+.gradio-container .tabs [role="menu"] button *,
+.gradio-container .tabs ul [role="tab"] *,
+.gradio-container .tabs ul button * {
+    color: #1f2937 !important;
+}
+
+body [role="menu"] [role="tab"]:hover,
+body [role="menu"] button:hover,
+body [role="menu"] button[aria-selected="true"]:hover,
+body [role="menu"] [aria-selected="true"]:hover,
+.gradio-container .tab-nav [role="menu"] [role="tab"]:hover,
+.gradio-container .tab-nav [role="menu"] button:hover,
+.gradio-container .tab-nav ul [role="tab"]:hover,
+.gradio-container .tab-nav ul button:hover,
+.gradio-container .tabs [role="menu"] [role="tab"]:hover,
+.gradio-container .tabs [role="menu"] button:hover,
+.gradio-container .tabs ul [role="tab"]:hover,
+.gradio-container .tabs ul button:hover {
+    background: #eff6ff !important;
+    color: #12372a !important;
+}
+
 .gradio-container .light-dataframe,
 .gradio-container .light-dataframe *,
 .gradio-container .membership-table,
