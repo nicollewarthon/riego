@@ -1457,6 +1457,7 @@ def crear_interfaz() -> gr.Blocks:
                             filterable=False,
                             allow_custom_value=False,
                             buttons=[],
+                            elem_id="tipo-cultivo-select",
                             elem_classes=["clean-dropdown"],
                         )
                     boton_calcular = gr.Button("Calcular riego inteligente", variant="primary")

@@ -1,12 +1,39 @@
 /* Limpieza visual del formulario "Evaluar riego". */
 
+@keyframes dropdownOpen {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .gradio-container .input-card {
+    position: relative !important;
+    overflow: visible !important;
+    z-index: 1 !important;
     background: #ffffff !important;
     border: 1px solid #dbe7e1 !important;
     border-radius: 10px !important;
     padding: 14px 16px !important;
     margin-bottom: 12px !important;
     box-shadow: 0 6px 18px rgba(37, 99, 235, 0.06) !important;
+}
+
+.gradio-container .input-card,
+.gradio-container .input-card *,
+.gradio-container .slider-row,
+.gradio-container .slider-row *,
+.gradio-container .clean-dropdown,
+.gradio-container .clean-dropdown * {
+    overflow: visible !important;
+}
+
+.gradio-container .input-card:focus-within {
+    z-index: 10000 !important;
 }
 
 .gradio-container .input-card .field-title,
@@ -44,6 +71,9 @@
 .gradio-container .clean-slider,
 .gradio-container .clean-number,
 .gradio-container .clean-dropdown {
+    position: relative !important;
+    overflow: visible !important;
+    z-index: 5 !important;
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
@@ -53,7 +83,10 @@
 .gradio-container .clean-slider .wrap,
 .gradio-container .clean-slider .container,
 .gradio-container .clean-number .wrap,
-.gradio-container .clean-dropdown .wrap {
+.gradio-container .clean-dropdown .wrap,
+.gradio-container .clean-dropdown .container {
+    position: relative !important;
+    overflow: visible !important;
     background: transparent !important;
     border: none !important;
     padding: 0 !important;
@@ -162,6 +195,8 @@
 .gradio-container .clean-dropdown [role="combobox"],
 .gradio-container .clean-dropdown input,
 .gradio-container .clean-dropdown select {
+    position: relative !important;
+    z-index: 10001 !important;
     min-height: 38px !important;
     height: 38px !important;
     background: #ffffff !important;
@@ -172,6 +207,13 @@
     display: flex !important;
     align-items: center !important;
     width: 100% !important;
+}
+
+.gradio-container #tipo-cultivo-select,
+.gradio-container #tipo-cultivo-select *,
+.gradio-container #tipo-cultivo-select .wrap,
+.gradio-container #tipo-cultivo-select .container {
+    overflow: visible !important;
 }
 
 .gradio-container .clean-dropdown input,
@@ -201,7 +243,22 @@
     border-radius: 12px !important;
     box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14) !important;
     padding: 6px !important;
-    z-index: 9999 !important;
+    z-index: 100000 !important;
+    animation: dropdownOpen 0.18s ease both !important;
+}
+
+.gradio-container .clean-dropdown [role="listbox"],
+.gradio-container .clean-dropdown .options,
+.gradio-container .clean-dropdown .dropdown-options,
+.gradio-container #tipo-cultivo-select [role="listbox"],
+.gradio-container #tipo-cultivo-select .options,
+.gradio-container #tipo-cultivo-select .dropdown-options {
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    right: auto !important;
+    width: 100% !important;
+    min-width: 100% !important;
 }
 
 .gradio-container [role="option"],
@@ -235,6 +292,9 @@ body .popover,
 body .menu,
 body .svelte-select-list {
     box-sizing: border-box !important;
+    position: absolute !important;
+    overflow-y: auto !important;
+    max-height: min(260px, 45vh) !important;
     background: #ffffff !important;
     color: #1f2937 !important;
     border: 1px solid #dbe7e1 !important;
@@ -242,6 +302,7 @@ body .svelte-select-list {
     box-shadow: 0 16px 36px rgba(37, 99, 235, 0.16) !important;
     padding: 6px !important;
     z-index: 99999 !important;
+    animation: dropdownOpen 0.18s ease both !important;
 }
 
 body [role="menu"] *,
