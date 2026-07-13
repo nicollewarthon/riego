@@ -523,6 +523,127 @@ body [role="menu"] [aria-selected="true"]:hover,
     border-color: #cbd5e1 !important;
 }
 
+.gradio-container .membership-panel,
+.gradio-container .membership-panel *,
+.gradio-container .membership-combobox,
+.gradio-container .membership-combobox * {
+    overflow: visible !important;
+}
+
+.gradio-container .membership-panel {
+    position: relative !important;
+    z-index: 5000 !important;
+}
+
+.gradio-container .membership-combobox {
+    position: relative !important;
+    z-index: 5001 !important;
+}
+
+.gradio-container .membership-combobox [role="combobox"],
+.gradio-container .membership-combobox input {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #d7d2e8 !important;
+    border-radius: 10px !important;
+    min-height: 42px !important;
+    box-shadow: none !important;
+}
+
+.gradio-container .membership-combobox [role="combobox"]:hover,
+.gradio-container .membership-combobox input:hover {
+    background: #fbf9ff !important;
+    border-color: #b8a7e6 !important;
+}
+
+.gradio-container .membership-combobox [role="listbox"],
+.gradio-container .membership-combobox .options,
+.gradio-container .membership-combobox .dropdown-options {
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-height: 280px !important;
+    overflow-y: auto !important;
+    background: #ffffff !important;
+    border: 1px solid #d7d2e8 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 16px 34px rgba(88, 70, 140, 0.16) !important;
+    z-index: 100000 !important;
+}
+
+.gradio-container .membership-combobox [role="option"] {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+    border-radius: 10px !important;
+}
+
+.gradio-container .membership-combobox [role="option"]:hover,
+.gradio-container .membership-combobox [role="option"][aria-selected="true"] {
+    background: #f3eeff !important;
+    color: #1f2937 !important;
+}
+
+.gradio-container .membership-params-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+    border: 1px solid #d9d6e3 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 10px 24px rgba(88, 70, 140, 0.08) !important;
+    overflow: hidden !important;
+}
+
+.gradio-container .membership-params-table .table-wrap,
+.gradio-container .membership-params-table [role="grid"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: auto !important;
+}
+
+.gradio-container .membership-params-table table {
+    width: max-content !important;
+    min-width: 100% !important;
+    table-layout: auto !important;
+    border-collapse: collapse !important;
+}
+
+.gradio-container .membership-params-table th,
+.gradio-container .membership-params-table [role="columnheader"] {
+    background: #f3eeff !important;
+    color: #24304a !important;
+    border-color: #d9d6e3 !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    min-width: 150px !important;
+    padding: 12px 14px !important;
+}
+
+.gradio-container .membership-params-table td,
+.gradio-container .membership-params-table [role="gridcell"] {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border-color: #e5e7eb !important;
+    white-space: nowrap !important;
+    min-width: 150px !important;
+    padding: 11px 14px !important;
+}
+
+.gradio-container .membership-params-table tr:nth-child(even) td,
+.gradio-container .membership-params-table [role="row"]:nth-child(even) [role="gridcell"] {
+    background: #fbf9ff !important;
+}
+
+.gradio-container .membership-params-table tr:hover td,
+.gradio-container .membership-params-table [role="row"]:hover [role="gridcell"] {
+    background: #efe7ff !important;
+    color: #1f2937 !important;
+}
+
 .gradio-container .section-card {
     width: 100% !important;
     max-width: 100% !important;

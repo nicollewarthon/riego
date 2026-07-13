@@ -1233,6 +1233,43 @@ def tabla_funciones_pertenencia() -> pd.DataFrame:
     return pd.DataFrame(membership.obtener_tabla_parametros())
 
 
+VARIABLES_MEMBRESIA = [
+    ("Humedad del suelo", "humedad_suelo"),
+    ("Temperatura ambiental", "temperatura_ambiental"),
+    ("Humedad ambiental", "humedad_ambiental"),
+    ("Velocidad del viento", "velocidad_viento"),
+    ("Tipo de cultivo", "tipo_cultivo"),
+]
+
+
+NOMBRES_VARIABLES_MEMBRESIA = {
+    "humedad_suelo": "Humedad del suelo",
+    "temperatura_ambiental": "Temperatura ambiental",
+    "humedad_ambiental": "Humedad ambiental",
+    "velocidad_viento": "Velocidad del viento",
+    "tipo_cultivo": "Tipo de cultivo",
+}
+
+
+def tabla_parametros_variable(nombre_variable: str) -> pd.DataFrame:
+    """Devuelve parametros de membresia filtrados por variable y con titulos legibles."""
+    tabla = tabla_funciones_pertenencia()
+    if nombre_variable:
+        tabla = tabla[tabla["variable"] == nombre_variable].copy()
+
+    tabla = tabla.rename(
+        columns={
+            "variable": "Variable",
+            "conjunto": "Conjunto linguistico",
+            "tipo": "Tipo de funcion",
+            "parametros": "Parametros",
+            "universo": "Rango",
+        }
+    )
+    tabla["Variable"] = tabla["Variable"].map(NOMBRES_VARIABLES_MEMBRESIA).fillna(tabla["Variable"])
+    return tabla
+
+
 def tabla_reglas() -> pd.DataFrame:
     """Devuelve tabla de reglas difusas."""
     return pd.DataFrame(rules.obtener_tabla_reglas())
@@ -1944,12 +1981,13 @@ def crear_interfaz() -> gr.Blocks:
                 gr.Markdown("### Parametros y visualizacion de funciones de pertenencia")
                 with gr.Row(elem_classes=["controls-grid"]):
                     selector_variable = gr.Dropdown(
-                        choices=list(membership.VARIABLES_DIFUSAS.keys()),
+                        choices=VARIABLES_MEMBRESIA,
                         value="humedad_suelo",
                         label="Variable difusa",
                         filterable=False,
                         allow_custom_value=False,
                         buttons=[],
+                        elem_classes=["membership-combobox"],
                     )
                     selector_salida_agregada = gr.Dropdown(
                         choices=list(SALIDAS.keys()),
@@ -1958,6 +1996,7 @@ def crear_interfaz() -> gr.Blocks:
                         filterable=False,
                         allow_custom_value=False,
                         buttons=[],
+                        elem_classes=["membership-combobox"],
                     )
                 boton_actualizar_graficas = gr.Button("Actualizar graficas con valores ingresados", variant="primary")
             with gr.Column(elem_classes=["section-card", "plot-section"]):
@@ -1966,13 +2005,13 @@ def crear_interfaz() -> gr.Blocks:
                 grafico_salida_agregada = gr.Plot(label="Salida agregada")
             with gr.Column(elem_classes=["section-card"]):
                 gr.Markdown("### Tabla de parametros")
-                gr.Dataframe(
-                    value=tabla_funciones_pertenencia,
+                tabla_parametros_membresia = gr.Dataframe(
+                    value=lambda: tabla_parametros_variable("humedad_suelo"),
                     interactive=False,
                     wrap=True,
-                    max_height=620,
+                    max_height=520,
                     show_row_numbers=False,
-                    elem_classes=["light-dataframe", "wide-dataframe", "membership-table"],
+                    elem_classes=["wide-dataframe", "membership-table", "membership-params-table"],
                 )
             with gr.Column(elem_classes=["section-card", "math-note"]):
                 gr.Markdown(
@@ -2308,6 +2347,11 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementad
             inputs=entradas_grafico_membresia,
             outputs=grafico_membresia,
         )
+        selector_variable.change(
+            fn=tabla_parametros_variable,
+            inputs=selector_variable,
+            outputs=tabla_parametros_membresia,
+        )
         selector_salida_agregada.change(
             fn=graficar_salida_agregada_interfaz,
             inputs=entradas_grafico_agregado,
@@ -2321,6 +2365,10 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementad
             fn=graficar_salida_agregada_interfaz,
             inputs=entradas_grafico_agregado,
             outputs=grafico_salida_agregada,
+        ).then(
+            fn=tabla_parametros_variable,
+            inputs=selector_variable,
+            outputs=tabla_parametros_membresia,
         )
         demo.load(fn=graficar_membresia, inputs=entradas_grafico_membresia, outputs=grafico_membresia)
         demo.load(
