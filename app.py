@@ -81,8 +81,8 @@ CSS = """
     --verde-claro: #e8f5ed;
     --azul: #1f6f9f;
     --azul-claro: #eaf5fb;
-    --gris: #0f172a;
-    --gris-suave: #334155;
+    --gris: #000000;
+    --gris-suave: #000000;
 }
 .gradio-container {
     max-width: 1180px !important;
@@ -109,7 +109,12 @@ CSS = """
 .gradio-container h2,
 .gradio-container h3,
 .gradio-container h4 {
-    color: #064e3b !important;
+    color: #000000 !important;
+}
+.gradio-container *,
+.gradio-container *::before,
+.gradio-container *::after {
+    color: #000000 !important;
 }
 .gradio-container .block,
 .gradio-container .form,
@@ -131,7 +136,7 @@ CSS = """
     border: 1px solid #cfe8d8;
 }
 .hero h1 {
-    color: #14532d;
+    color: #000000 !important;
     margin-bottom: 8px;
 }
 .hero p, .texto-suave {
@@ -145,12 +150,12 @@ CSS = """
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 .metric-label {
-    color: #0f5f89 !important;
+    color: #000000 !important;
     font-size: 0.9rem;
     font-weight: 700;
 }
 .metric-value {
-    color: #14532d !important;
+    color: #000000 !important;
     font-size: 1.7rem;
     font-weight: 800;
 }
@@ -161,7 +166,7 @@ CSS = """
     border: 1px solid #dbeafe;
 }
 .ok {
-    color: #166534;
+    color: #000000 !important;
     font-weight: 700;
 }
 .pending {
@@ -174,7 +179,7 @@ CSS = """
 }
 .rule-table th {
     background: #e8f5ed;
-    color: #14532d;
+    color: #000000 !important;
     text-align: left;
     padding: 8px;
     border: 1px solid #cbd5e1;
@@ -190,15 +195,15 @@ CSS = """
 }
 button.primary {
     background: #1f7a4d !important;
-    color: #ffffff !important;
+    color: #000000 !important;
     border-color: #166534 !important;
 }
 button.primary span,
 .gradio-container button.primary span {
-    color: #ffffff !important;
+    color: #000000 !important;
 }
 .gradio-container button:not(.primary) {
-    color: #0f172a !important;
+    color: #000000 !important;
 }
 @media (max-width: 760px) {
     .hero {
