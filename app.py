@@ -559,6 +559,7 @@ def crear_control_numerico(
                     value=valor,
                     step=paso,
                     show_label=False,
+                    buttons=[],
                     elem_classes=["clean-slider"],
                 )
                 gr.HTML(
@@ -1470,7 +1471,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             rule_viewer_grafico,
             rule_viewer_resumen,
         ]
-        humedad_suelo.change(
+        humedad_suelo.release(
             fn=lambda valor: limitar_valor_control(valor, 0, 100, 0),
             inputs=humedad_suelo,
             outputs=humedad_suelo_numero,
@@ -1480,7 +1481,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             inputs=humedad_suelo_numero,
             outputs=humedad_suelo,
         )
-        temperatura.change(
+        temperatura.release(
             fn=lambda valor: limitar_valor_control(valor, 0, 45, 1),
             inputs=temperatura,
             outputs=temperatura_numero,
@@ -1490,7 +1491,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             inputs=temperatura_numero,
             outputs=temperatura,
         )
-        humedad_ambiental.change(
+        humedad_ambiental.release(
             fn=lambda valor: limitar_valor_control(valor, 0, 100, 0),
             inputs=humedad_ambiental,
             outputs=humedad_ambiental_numero,
@@ -1500,7 +1501,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             inputs=humedad_ambiental_numero,
             outputs=humedad_ambiental,
         )
-        velocidad_viento.change(
+        velocidad_viento.release(
             fn=lambda valor: limitar_valor_control(valor, 0, 40, 1),
             inputs=velocidad_viento,
             outputs=velocidad_viento_numero,
