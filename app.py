@@ -158,90 +158,38 @@ CSS = """
     border-color: var(--borde) !important;
 }
 .hero {
-    position: relative;
-    min-height: 360px;
-    padding: 76px 28px 54px;
-    border-radius: 0;
-    background:
-        radial-gradient(circle at 50% 48%, rgba(15, 118, 110, 0.14) 0 8%, transparent 24%),
-        linear-gradient(115deg, rgba(226, 232, 240, 0.92) 0%, rgba(255, 255, 255, 0.98) 44%, rgba(236, 254, 255, 0.94) 100%);
-    border: 1px solid #e5e7eb;
-    overflow: hidden;
-    text-align: center;
-}
-.hero::before {
-    content: "";
-    position: absolute;
-    left: -4%;
-    right: -4%;
-    bottom: 0;
-    height: 58%;
-    background:
-        linear-gradient(135deg, transparent 0 28%, rgba(148, 163, 184, 0.22) 28% 31%, transparent 31%),
-        linear-gradient(45deg, transparent 0 34%, rgba(148, 163, 184, 0.2) 34% 37%, transparent 37%),
-        linear-gradient(160deg, rgba(226, 232, 240, 0.95), rgba(248, 250, 252, 0.15));
-    clip-path: polygon(0 55%, 18% 20%, 34% 58%, 52% 18%, 70% 62%, 86% 30%, 100% 58%, 100% 100%, 0 100%);
-    z-index: 0;
-}
-.hero::after {
-    content: "";
-    position: absolute;
-    left: 50%;
-    bottom: 46px;
-    width: 150px;
-    height: 150px;
-    transform: translateX(-50%);
-    border-radius: 50%;
-    background:
-        radial-gradient(circle at 36% 34%, #fca5a5 0 10%, transparent 11%),
-        radial-gradient(circle at 62% 46%, #ef4444 0 15%, transparent 16%),
-        radial-gradient(circle at 52% 52%, #dc2626 0 44%, #b91c1c 45% 62%, transparent 63%);
-    opacity: 0.82;
-    z-index: 0;
-    box-shadow: 0 18px 35px rgba(15, 118, 110, 0.16);
+    padding: 34px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #f8fafc 0%, #ecfdf5 100%);
+    border: 1px solid #dbe7e1;
+    text-align: left;
+    box-shadow: 0 8px 22px rgba(15, 118, 110, 0.08);
 }
 .hero h1 {
-    position: relative;
-    z-index: 1;
-    color: #14532d !important;
-    margin: 0 0 10px;
-    font-size: clamp(2rem, 4vw, 3.3rem);
+    color: #12372a !important;
+    margin: 0 0 12px;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
     letter-spacing: 0;
-    text-transform: uppercase;
 }
 .hero p, .texto-suave {
     color: var(--texto-suave) !important;
 }
 .hero p {
-    position: relative;
-    z-index: 1;
-    max-width: 680px;
-    margin: 0 auto;
-    font-size: 1.05rem;
-    line-height: 1.7;
-}
-.site-topbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    min-height: 34px;
-    padding: 0 18px;
-    background: #2b160f;
-    color: #ffffff !important;
-    font-size: 12px;
-}
-.site-topbar *,
-.site-topbar span {
-    color: #ffffff !important;
+    max-width: 860px;
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.65;
 }
 .site-brandbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    min-height: 82px;
+    min-height: 76px;
     padding: 14px 18px;
     background: #ffffff;
-    border-bottom: 1px solid #e5e7eb;
+    border: 1px solid #dbe7e1;
+    border-radius: 10px;
+    margin-bottom: 14px;
 }
 .brand-lockup {
     display: flex;
@@ -260,73 +208,46 @@ CSS = """
     color: #0f766e !important;
 }
 .brand-name {
-    color: #2b160f !important;
+    color: #12372a !important;
     font-weight: 800;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0;
 }
 .brand-subtitle {
     color: #64748b !important;
     font-size: 12px;
     margin-top: 2px;
 }
-.home-promo-grid {
+.academic-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 14px;
-    margin: 14px 0 22px;
+    margin: 18px 0;
 }
-.promo-tile {
-    min-height: 108px;
+.academic-card {
     padding: 18px;
-    border-radius: 4px;
-    background: linear-gradient(135deg, #ecfdf5, #ffffff);
+    border-radius: 10px;
+    background: #ffffff;
     border: 1px solid #dbe7e1;
-    box-shadow: 0 8px 18px rgba(15, 118, 110, 0.08);
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.06);
 }
-.promo-tile:nth-child(2) {
-    background: linear-gradient(135deg, #fff7ed, #ffffff);
-}
-.promo-tile:nth-child(3) {
-    background: linear-gradient(135deg, #eff6ff, #ffffff);
-}
-.promo-title {
+.academic-card h3 {
     color: #12372a !important;
-    font-size: 13px;
-    font-weight: 800;
-    text-transform: uppercase;
+    font-size: 15px;
+    font-weight: 700;
     margin-bottom: 8px;
 }
-.promo-text {
+.academic-card p,
+.academic-card li {
     color: #475569 !important;
     font-size: 13px;
-    line-height: 1.45;
-}
-.home-service-strip {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    border: 1px solid #e5e7eb;
-    margin: 10px 0 26px;
-    background: #ffffff;
-}
-.service-item {
-    padding: 10px 12px;
-    text-align: center;
-    color: #64748b !important;
-    font-size: 12px;
-    border-right: 1px solid #e5e7eb;
-    text-transform: uppercase;
-}
-.service-item:last-child {
-    border-right: 0;
+    line-height: 1.55;
+    margin: 0;
 }
 .section-heading {
-    margin: 20px 0 14px;
-    text-align: center;
-    color: #334155 !important;
+    margin: 22px 0 14px;
+    color: #12372a !important;
     font-size: 18px;
-    font-weight: 500;
-    text-transform: uppercase;
+    font-weight: 700;
 }
 .module-grid {
     display: grid;
@@ -334,23 +255,16 @@ CSS = """
     gap: 14px;
 }
 .module-card {
-    border: 1px solid #e5e7eb;
+    border: 1px solid #dbe7e1;
+    border-radius: 10px;
     background: #ffffff;
-    min-height: 150px;
     padding: 16px;
-    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.07);
-}
-.module-visual {
-    height: 54px;
-    margin-bottom: 14px;
-    border-radius: 4px;
-    background: linear-gradient(135deg, #d1fae5, #eff6ff);
+    box-shadow: 0 8px 18px rgba(37, 99, 235, 0.06);
 }
 .module-card h3 {
     color: #12372a !important;
-    font-size: 13px;
+    font-size: 14px;
     margin: 0 0 8px;
-    text-transform: uppercase;
 }
 .module-card p {
     color: #64748b !important;
@@ -686,14 +600,11 @@ button.primary span,
     stroke: #64748b !important;
 }
 @media (max-width: 760px) {
-    .site-topbar,
     .site-brandbar {
         padding-left: 12px;
         padding-right: 12px;
     }
-    .site-brandbar,
-    .home-promo-grid,
-    .home-service-strip,
+    .academic-grid,
     .module-grid {
         grid-template-columns: 1fr;
     }
@@ -702,34 +613,14 @@ button.primary span,
         gap: 12px;
         flex-direction: column;
     }
-    .site-topbar {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 4px;
-        padding-top: 8px;
-        padding-bottom: 8px;
-    }
     .hero {
         padding: 18px;
-        min-height: 300px;
     }
     .hero h1 {
         font-size: 1.8rem;
     }
-    .hero::after {
-        width: 110px;
-        height: 110px;
-        bottom: 32px;
-    }
     .metric-value {
         font-size: 1.35rem;
-    }
-    .service-item {
-        border-right: 0;
-        border-bottom: 1px solid #e5e7eb;
-    }
-    .service-item:last-child {
-        border-bottom: 0;
     }
 }
 """
@@ -1478,16 +1369,12 @@ def crear_interfaz() -> gr.Blocks:
         resultado_estado = gr.State({})
         gr.HTML(
             """
-            <div class="site-topbar">
-                <span>Universidad Cesar Vallejo - Sistemas Inteligentes</span>
-                <span>Riego inteligente con logica difusa Mamdani</span>
-            </div>
             <div class="site-brandbar">
                 <div class="brand-lockup">
                     <div class="brand-mark">RI</div>
                     <div>
-                        <div class="brand-name">Riego Mamdani</div>
-                        <div class="brand-subtitle">Sistema academico de decision agricola</div>
+                        <div class="brand-name">Sistema Inteligente de Riego</div>
+                        <div class="brand-subtitle">Universidad Cesar Vallejo - Ingenieria de Sistemas</div>
                     </div>
                 </div>
             </div>
@@ -1509,46 +1396,37 @@ def crear_interfaz() -> gr.Blocks:
             )
             gr.HTML(
                 """
-                <div class="home-promo-grid">
-                    <div class="promo-tile">
-                        <div class="promo-title">Evaluacion inteligente</div>
-                        <div class="promo-text">Analiza humedad, temperatura, viento, ambiente y cultivo para recomendar riego.</div>
+                <div class="academic-grid">
+                    <div class="academic-card">
+                        <h3>Objetivo academico</h3>
+                        <p>Diseñar un sistema inteligente que apoye la toma de decisiones de riego mediante logica difusa Mamdani.</p>
                     </div>
-                    <div class="promo-tile">
-                        <div class="promo-title">Mamdani explicable</div>
-                        <div class="promo-text">Muestra grados de pertenencia, reglas activadas, agregacion y centroide final.</div>
+                    <div class="academic-card">
+                        <h3>Variables evaluadas</h3>
+                        <p>Humedad del suelo, temperatura ambiental, humedad ambiental, velocidad del viento y tipo de cultivo.</p>
                     </div>
-                    <div class="promo-tile">
-                        <div class="promo-title">Reporte academico</div>
-                        <div class="promo-text">Genera historial, visualizaciones, Rule Viewer, Surface Viewer y PDF del escenario.</div>
+                    <div class="academic-card">
+                        <h3>Salidas del sistema</h3>
+                        <p>Tiempo de riego, frecuencia de riego y caudal de agua calculados con inferencia difusa.</p>
                     </div>
                 </div>
-                <div class="home-service-strip">
-                    <div class="service-item">CPU basica</div>
-                    <div class="service-item">Interfaz web responsive</div>
-                    <div class="service-item">Exportacion CSV y PDF</div>
-                </div>
-                <div class="section-heading">Modulos destacados</div>
+                <div class="section-heading">Modulos del proyecto</div>
                 <div class="module-grid">
                     <div class="module-card">
-                        <div class="module-visual"></div>
                         <h3>Motor difuso</h3>
                         <p>Inferencia Mamdani completa con fuzzificacion, reglas, agregacion y centroide.</p>
                     </div>
                     <div class="module-card">
-                        <div class="module-visual"></div>
-                        <h3>Pertenencia</h3>
+                        <h3>Funciones de pertenencia</h3>
                         <p>Funciones triangulares y trapezoidales para entradas y salidas del sistema.</p>
                     </div>
                     <div class="module-card">
-                        <div class="module-visual"></div>
                         <h3>Rule Viewer</h3>
                         <p>Vista educativa de reglas activadas, intensidad y consecuentes recortados.</p>
                     </div>
                     <div class="module-card">
-                        <div class="module-visual"></div>
-                        <h3>Surface Viewer</h3>
-                        <p>Superficies 3D calculadas punto por punto con el motor Mamdani real.</p>
+                        <h3>Reportes</h3>
+                        <p>Historial CSV y reporte PDF para documentar escenarios evaluados.</p>
                     </div>
                 </div>
 """
