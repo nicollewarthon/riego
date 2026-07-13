@@ -12,15 +12,17 @@ from reportlab.lib import colors
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import cm
-from reportlab.platypus import Image, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
+from reportlab.pdfgen import canvas
+from reportlab.platypus import Image, KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle
 
 import charts
 import membership
 
 
 TITULO_PROYECTO = "Sistema Inteligente para el Riego Automatico mediante Logica Difusa Mamdani"
-AUTORES_PREDETERMINADOS = "Jose Alejandro Romero Aguirre"
+AUTORES_PREDETERMINADOS = "Grupo X"
 CARPETA_REPORTES = Path("assets") / "reports"
+RUTA_LOGO = Path("assets") / "logo.png"
 
 
 def _validar_resultado(resultado: dict[str, Any]) -> None:
@@ -56,55 +58,154 @@ def _crear_ruta_reporte(ruta_salida: Path | None) -> Path:
 
 
 def _estilos() -> dict[str, ParagraphStyle]:
-    """Define estilos simples para el reporte academico."""
+    """Define estilos para el reporte tecnico institucional."""
     estilos_base = getSampleStyleSheet()
     return {
         "titulo": ParagraphStyle(
             "TituloProyecto",
             parent=estilos_base["Title"],
             fontName="Helvetica-Bold",
-            fontSize=16,
-            leading=20,
+            fontSize=18,
+            leading=23,
             textColor=colors.HexColor("#14532d"),
             alignment=1,
             spaceAfter=12,
+        ),
+        "portada_subtitulo": ParagraphStyle(
+            "PortadaSubtitulo",
+            parent=estilos_base["Heading2"],
+            fontName="Helvetica",
+            fontSize=13,
+            leading=17,
+            textColor=colors.HexColor("#1f6f9f"),
+            alignment=1,
+            spaceAfter=18,
         ),
         "subtitulo": ParagraphStyle(
             "Subtitulo",
             parent=estilos_base["Heading2"],
             fontName="Helvetica-Bold",
-            fontSize=12,
-            leading=15,
-            textColor=colors.HexColor("#1f6f9f"),
-            spaceBefore=8,
-            spaceAfter=6,
+            fontSize=13,
+            leading=16,
+            textColor=colors.HexColor("#14532d"),
+            spaceBefore=14,
+            spaceAfter=8,
         ),
         "normal": ParagraphStyle(
             "NormalReporte",
             parent=estilos_base["BodyText"],
             fontName="Helvetica",
-            fontSize=9,
-            leading=12,
-            spaceAfter=5,
+            fontSize=9.5,
+            leading=13.5,
+            textColor=colors.HexColor("#334155"),
+            spaceAfter=7,
         ),
         "formula": ParagraphStyle(
             "Formula",
-            parent=estilos_base["Code"],
-            fontName="Courier",
+            parent=estilos_base["BodyText"],
+            fontName="Helvetica",
+            fontSize=11,
+            leading=16,
+            alignment=1,
+            textColor=colors.HexColor("#0f172a"),
+            backColor=colors.HexColor("#f8fafc"),
+            borderColor=colors.HexColor("#dbe7e1"),
+            borderWidth=0.5,
+            borderPadding=7,
+            spaceAfter=9,
+        ),
+        "card_titulo": ParagraphStyle(
+            "CardTitulo",
+            parent=estilos_base["Heading3"],
+            fontName="Helvetica-Bold",
+            fontSize=11,
+            leading=14,
+            textColor=colors.HexColor("#12372a"),
+            spaceAfter=5,
+        ),
+        "pequeno": ParagraphStyle(
+            "Pequeno",
+            parent=estilos_base["BodyText"],
+            fontName="Helvetica",
             fontSize=8,
             leading=10,
-            backColor=colors.HexColor("#f8fafc"),
-            borderColor=colors.HexColor("#cbd5e1"),
-            borderWidth=0.4,
-            borderPadding=5,
-            spaceAfter=6,
+            textColor=colors.HexColor("#64748b"),
+            spaceAfter=3,
         ),
     }
 
 
+class _CanvasNumerado(canvas.Canvas):
+    """Canvas de dos pasadas para imprimir Pagina X de Y."""
+
+    def __init__(self, *args: Any, fecha_hora: str = "", autores: str = "", **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        self._estados_paginas: list[dict[str, Any]] = []
+        self.fecha_hora = fecha_hora
+        self.autores = autores
+
+    def showPage(self) -> None:  # noqa: N802 - API de ReportLab
+        self._estados_paginas.append(dict(self.__dict__))
+        self._startPage()
+
+    def save(self) -> None:
+        total_paginas = len(self._estados_paginas)
+        for estado in self._estados_paginas:
+            self.__dict__.update(estado)
+            self._dibujar_encabezado_pie(total_paginas)
+            canvas.Canvas.showPage(self)
+        canvas.Canvas.save(self)
+
+    def _dibujar_encabezado_pie(self, total_paginas: int) -> None:
+        numero = self._pageNumber
+        if numero == 1:
+            return
+        ancho, alto = A4
+        verde = colors.HexColor("#14532d")
+        gris = colors.HexColor("#64748b")
+        self.saveState()
+        self.setStrokeColor(colors.HexColor("#dbe7e1"))
+        self.setLineWidth(0.6)
+        self.line(1.5 * cm, alto - 1.05 * cm, ancho - 1.5 * cm, alto - 1.05 * cm)
+        self.setFont("Helvetica-Bold", 8.5)
+        self.setFillColor(verde)
+        self.drawString(1.5 * cm, alto - 0.78 * cm, "Sistema Inteligente de Riego mediante Logica Difusa Mamdani")
+        self.line(1.5 * cm, 1.05 * cm, ancho - 1.5 * cm, 1.05 * cm)
+        self.setFont("Helvetica", 8)
+        self.setFillColor(gris)
+        self.drawString(1.5 * cm, 0.72 * cm, self.autores)
+        self.drawCentredString(ancho / 2, 0.72 * cm, f"Pagina {numero} de {total_paginas}")
+        self.drawRightString(ancho - 1.5 * cm, 0.72 * cm, self.fecha_hora)
+        self.restoreState()
+
+
 def _tabla(datos: list[list[Any]], anchos: list[float] | None = None) -> Table:
     """Crea una tabla ReportLab con estilo uniforme."""
-    tabla = Table(datos, colWidths=anchos, repeatRows=1)
+    estilo_celda = ParagraphStyle(
+        "CeldaTabla",
+        fontName="Helvetica",
+        fontSize=7.4,
+        leading=9.3,
+        textColor=colors.HexColor("#334155"),
+    )
+    estilo_encabezado = ParagraphStyle(
+        "EncabezadoTabla",
+        parent=estilo_celda,
+        fontName="Helvetica-Bold",
+        textColor=colors.HexColor("#14532d"),
+    )
+    datos_procesados: list[list[Any]] = []
+    for indice_fila, fila in enumerate(datos):
+        fila_procesada = []
+        for celda in fila:
+            if isinstance(celda, str):
+                estilo = estilo_encabezado if indice_fila == 0 else estilo_celda
+                fila_procesada.append(Paragraph(celda, estilo))
+            else:
+                fila_procesada.append(celda)
+        datos_procesados.append(fila_procesada)
+
+    tabla = Table(datos_procesados, colWidths=anchos, repeatRows=1)
     tabla.setStyle(
         TableStyle(
             [
@@ -120,6 +221,62 @@ def _tabla(datos: list[list[Any]], anchos: list[float] | None = None) -> Table:
         )
     )
     return tabla
+
+
+def _seccion(elementos: list[Any], titulo: str, descripcion: str, estilos: dict[str, ParagraphStyle]) -> None:
+    """Agrega un titulo de seccion con explicacion breve."""
+    elementos.append(Paragraph(titulo, estilos["subtitulo"]))
+    elementos.append(Paragraph(descripcion, estilos["normal"]))
+
+
+def _tarjeta(contenido: list[Any], ancho: float = 17.0 * cm, fondo: str = "#ffffff") -> Table:
+    """Crea una tarjeta de ancho completo para evitar tablas comprimidas."""
+    tabla = Table([[contenido]], colWidths=[ancho])
+    tabla.setStyle(
+        TableStyle(
+            [
+                ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor(fondo)),
+                ("BOX", (0, 0), (-1, -1), 0.45, colors.HexColor("#dbe7e1")),
+                ("LEFTPADDING", (0, 0), (-1, -1), 10),
+                ("RIGHTPADDING", (0, 0), (-1, -1), 10),
+                ("TOPPADDING", (0, 0), (-1, -1), 9),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 9),
+                ("VALIGN", (0, 0), (-1, -1), "TOP"),
+            ]
+        )
+    )
+    return tabla
+
+
+def _agregar_portada(
+    elementos: list[Any],
+    fecha_hora: str,
+    autores: str,
+    estilos: dict[str, ParagraphStyle],
+) -> None:
+    """Agrega una portada institucional limpia."""
+    elementos.append(Spacer(1, 1.2 * cm))
+    if RUTA_LOGO.exists():
+        elementos.append(Image(str(RUTA_LOGO), width=3.0 * cm, height=3.0 * cm, kind="proportional"))
+        elementos[-1].hAlign = "CENTER"
+        elementos.append(Spacer(1, 0.5 * cm))
+    elementos.append(Paragraph(TITULO_PROYECTO, estilos["titulo"]))
+    elementos.append(Paragraph("Reporte Tecnico de Evaluacion del Sistema", estilos["portada_subtitulo"]))
+    linea = Table([[""]], colWidths=[13 * cm], rowHeights=[0.08 * cm])
+    linea.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#14532d"))]))
+    linea.hAlign = "CENTER"
+    elementos.append(linea)
+    elementos.append(Spacer(1, 1.0 * cm))
+    datos = [
+        ["Autor", autores],
+        ["Fecha y hora de generacion", fecha_hora],
+        ["Universidad", "Universidad Cesar Vallejo"],
+        ["Escuela Profesional", "Ingenieria de Sistemas"],
+    ]
+    elementos.append(_tabla(datos, [6 * cm, 9 * cm]))
+    elementos.append(Spacer(1, 6.5 * cm))
+    elementos.append(Paragraph("Sistema Inteligente de Apoyo al Riego", estilos["portada_subtitulo"]))
+    elementos.append(PageBreak())
 
 
 def _guardar_figura(fig, ruta: Path) -> Path:
@@ -173,30 +330,146 @@ def _agregar_imagenes(elementos: list[Any], rutas: list[Path], estilos: dict[str
 
 
 def _tabla_grados(resultado: dict[str, Any]) -> Table:
-    """Crea tabla de grados de pertenencia."""
+    """Crea tabla de grados de pertenencia resaltando valores activos."""
     filas = [["Variable", "Conjunto", "Grado"]]
+    estilos_filas = []
+    indice = 1
     for variable, conjuntos in resultado["grados_pertenencia"].items():
         for conjunto, grado in conjuntos.items():
-            filas.append([variable, conjunto, f"{float(grado):.4f}"])
-    return _tabla(filas, [5 * cm, 6 * cm, 3 * cm])
+            grado_float = float(grado)
+            filas.append([variable, conjunto, f"{grado_float:.4f}"])
+            if grado_float > 0:
+                estilos_filas.extend(
+                    [
+                        ("BACKGROUND", (0, indice), (-1, indice), colors.HexColor("#ecfdf5")),
+                        ("TEXTCOLOR", (0, indice), (-1, indice), colors.HexColor("#14532d")),
+                        ("FONTNAME", (0, indice), (-1, indice), "Helvetica-Bold"),
+                    ]
+                )
+            else:
+                estilos_filas.extend(
+                    [
+                        ("BACKGROUND", (0, indice), (-1, indice), colors.HexColor("#f8fafc")),
+                        ("TEXTCOLOR", (0, indice), (-1, indice), colors.HexColor("#94a3b8")),
+                    ]
+                )
+            indice += 1
+    tabla = _tabla(filas, [5 * cm, 6 * cm, 3 * cm])
+    tabla.setStyle(TableStyle(estilos_filas))
+    return tabla
 
 
-def _tabla_reglas(resultado: dict[str, Any]) -> Table:
-    """Crea tabla de reglas activadas."""
-    filas = [["ID", "Regla linguistica", "Activacion", "Tiempo", "Frecuencia", "Caudal"]]
+def _agregar_tarjetas_reglas(
+    elementos: list[Any],
+    resultado: dict[str, Any],
+    estilos: dict[str, ParagraphStyle],
+) -> None:
+    """Agrega cada regla activada como tarjeta independiente."""
     for regla in resultado["reglas_activadas"]:
         consecuentes = regla["consecuentes"]
-        filas.append(
-            [
-                regla["id"],
-                regla["texto"],
-                f"{float(regla['grado_activacion']):.4f}",
-                consecuentes["tiempo_riego"],
-                consecuentes["frecuencia_riego"],
-                consecuentes["caudal_agua"],
-            ]
+        contenido = [
+            Paragraph(f"Regla {regla['id']}", estilos["card_titulo"]),
+            Paragraph("<b>Condicion</b>", estilos["normal"]),
+            Paragraph(str(regla["texto"]).split(" ENTONCES ")[0], estilos["normal"]),
+            Paragraph("<b>ENTONCES</b>", estilos["normal"]),
+            Paragraph(
+                f"Tiempo de riego -> {consecuentes['tiempo_riego']}<br/>"
+                f"Frecuencia -> {consecuentes['frecuencia_riego']}<br/>"
+                f"Caudal -> {consecuentes['caudal_agua']}",
+                estilos["normal"],
+            ),
+            Paragraph("<b>Grado de activacion</b>", estilos["normal"]),
+            Paragraph(f"{float(regla['grado_activacion']):.4f}", estilos["formula"]),
+            Paragraph("<b>Interpretacion</b>", estilos["normal"]),
+            Paragraph(str(regla["explicacion"]), estilos["normal"]),
+        ]
+        elementos.append(KeepTogether([_tarjeta(contenido), Spacer(1, 0.25 * cm)]))
+
+
+def _agregar_formulas_mamdani(elementos: list[Any], estilos: dict[str, ParagraphStyle]) -> None:
+    """Agrega formulas limpias y explicaciones sin sintaxis de codigo."""
+    _seccion(
+        elementos,
+        "Formulas del Sistema Mamdani",
+        "Esta seccion resume las etapas matematicas del sistema en lenguaje tecnico pero legible. "
+        "Las ecuaciones representan el proceso usado por el motor difuso para transformar entradas "
+        "en recomendaciones de riego.",
+        estilos,
+    )
+    bloques = [
+        (
+            "Fuzzificacion",
+            "En esta etapa el sistema determina el grado de pertenencia de cada variable de entrada "
+            "a sus conjuntos linguisticos.",
+            "&mu;<sub>triangular</sub>(x) = { (x-a) / (b-a) } o { (c-x) / (c-b) } segun el tramo",
+            "x es el valor medido; a, b y c definen el inicio, centro y fin de la funcion triangular.",
+        ),
+        (
+            "Funcion trapezoidal",
+            "Se utiliza en conjuntos extremos para representar zonas de saturacion baja o alta.",
+            "&mu;<sub>trapezoidal</sub>(x) = { (x-a) / (b-a) }, 1, o { (d-x) / (d-c) } segun el tramo",
+            "a y d delimitan el soporte; b y c delimitan la zona donde la pertenencia es maxima.",
+        ),
+        (
+            "Inferencia Mamdani",
+            "Para reglas tipo AND se utiliza el operador minimo.",
+            "&alpha; = min(&mu;<sub>1</sub>, &mu;<sub>2</sub>, ..., &mu;<sub>n</sub>)",
+            "El grado de activacion de una regla corresponde al menor grado de pertenencia de sus antecedentes.",
+        ),
+        (
+            "Agregacion",
+            "Todas las reglas activadas se unen mediante el operador maximo para formar una sola salida difusa.",
+            "&mu;<sub>agregada</sub>(z) = max(&mu;'<sub>1</sub>(z), &mu;'<sub>2</sub>(z), ..., &mu;'<sub>n</sub>(z))",
+            "Cada termino representa una funcion consecuente recortada por una regla activa.",
+        ),
+        (
+            "Desfuzzificacion",
+            "Despues de combinar las reglas, el sistema obtiene un unico valor numerico con el centroide.",
+            "z* = &Sigma;(z<sub>i</sub> &middot; &mu;(z<sub>i</sub>)) / &Sigma;&mu;(z<sub>i</sub>)",
+            "El resultado es el punto de equilibrio del area difusa agregada.",
+        ),
+    ]
+    for titulo, texto, formula, explicacion in bloques:
+        contenido = [
+            Paragraph(titulo, estilos["card_titulo"]),
+            Paragraph(texto, estilos["normal"]),
+            Paragraph(formula, estilos["formula"]),
+            Paragraph(explicacion, estilos["normal"]),
+        ]
+        elementos.append(_tarjeta(contenido, fondo="#f8fafc"))
+        elementos.append(Spacer(1, 0.25 * cm))
+
+
+def _agregar_recomendacion_final(
+    elementos: list[Any],
+    resultado: dict[str, Any],
+    estilos: dict[str, ParagraphStyle],
+) -> None:
+    """Agrega tarjeta final con la recomendacion principal."""
+    tiempo = float(resultado["tiempo_riego"])
+    frecuencia = float(resultado["frecuencia_riego"])
+    caudal = float(resultado["caudal_agua"])
+    tabla = _tabla(
+        [
+            ["Salida", "Recomendacion"],
+            ["Tiempo de riego", f"{tiempo:.2f} minutos"],
+            ["Frecuencia", f"{frecuencia:.2f} dias"],
+            ["Caudal", f"{caudal:.2f} L/min"],
+        ],
+        [7 * cm, 8 * cm],
+    )
+    contenido = [
+        Paragraph("RECOMENDACION FINAL DEL SISTEMA", estilos["card_titulo"]),
+        tabla,
+        Paragraph(
+            f"De acuerdo con las condiciones actuales del cultivo, el sistema recomienda realizar "
+            f"un riego durante {tiempo:.2f} minutos, repetirlo cada {frecuencia:.2f} dias y "
+            f"utilizar un caudal aproximado de {caudal:.2f} L/min. Esta recomendacion fue obtenida "
+            "mediante el proceso de inferencia difusa Mamdani.",
+            estilos["normal"],
         )
-    return _tabla(filas, [1.3 * cm, 8.2 * cm, 2 * cm, 2 * cm, 2 * cm, 2 * cm])
+    ]
+    elementos.append(_tarjeta(contenido, fondo="#ecfdf5"))
 
 
 def generar_reporte_pdf(
@@ -217,17 +490,20 @@ def generar_reporte_pdf(
         pagesize=A4,
         rightMargin=1.5 * cm,
         leftMargin=1.5 * cm,
-        topMargin=1.3 * cm,
-        bottomMargin=1.3 * cm,
+        topMargin=1.8 * cm,
+        bottomMargin=1.6 * cm,
     )
     elementos: list[Any] = []
 
     fecha_hora = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    elementos.append(Paragraph(TITULO_PROYECTO, estilos["titulo"]))
-    elementos.append(Paragraph(f"Fecha y hora: {fecha_hora}", estilos["normal"]))
-    elementos.append(Paragraph(f"Autores: {autores}", estilos["normal"]))
+    _agregar_portada(elementos, fecha_hora, autores, estilos)
 
-    elementos.append(Paragraph("Entradas", estilos["subtitulo"]))
+    _seccion(
+        elementos,
+        "Entradas",
+        "Estas son las condiciones evaluadas por el sistema antes de iniciar el proceso de inferencia difusa.",
+        estilos,
+    )
     entradas_tabla = [
         ["Variable", "Valor"],
         ["Humedad del suelo", f"{entradas.get('humedad_suelo', 'N/D')} %"],
@@ -237,8 +513,14 @@ def generar_reporte_pdf(
         ["Tipo de cultivo", str(entradas.get("tipo_cultivo", "N/D"))],
     ]
     elementos.append(_tabla(entradas_tabla, [7 * cm, 7 * cm]))
+    elementos.append(Spacer(1, 0.25 * cm))
 
-    elementos.append(Paragraph("Resultados", estilos["subtitulo"]))
+    _seccion(
+        elementos,
+        "Resultados",
+        "El motor Mamdani produce tres salidas numericas que representan la recomendacion de riego.",
+        estilos,
+    )
     resultados_tabla = [
         ["Salida", "Valor crisp"],
         ["Tiempo de riego", f"{float(resultado['tiempo_riego']):.4f} minutos"],
@@ -246,23 +528,46 @@ def generar_reporte_pdf(
         ["Caudal de agua", f"{float(resultado['caudal_agua']):.4f} L/min"],
     ]
     elementos.append(_tabla(resultados_tabla, [7 * cm, 7 * cm]))
-    elementos.append(Paragraph("Interpretacion", estilos["subtitulo"]))
+    elementos.append(Spacer(1, 0.25 * cm))
+
+    _seccion(
+        elementos,
+        "Interpretacion",
+        "La siguiente lectura resume la recomendacion emitida por el sistema inteligente.",
+        estilos,
+    )
     elementos.append(Paragraph(str(resultado["interpretacion"]), estilos["normal"]))
 
-    elementos.append(Paragraph("Formulas del sistema Mamdani", estilos["subtitulo"]))
-    elementos.append(Paragraph("Fuzzificacion triangular: mu(x;a,b,c)=max(min((x-a)/(b-a),(c-x)/(c-b)),0)", estilos["formula"]))
-    elementos.append(Paragraph("Fuzzificacion trapezoidal: mu(x;a,b,c,d)=max(min((x-a)/(b-a),1,(d-x)/(d-c)),0)", estilos["formula"]))
-    elementos.append(Paragraph("Inferencia Mamdani: alpha=min(mu1,mu2,...,mun); implicacion mu'_B(z)=min(alpha,mu_B(z))", estilos["formula"]))
-    elementos.append(Paragraph("Agregacion: mu_agregada(z)=max(mu'_B1(z),mu'_B2(z),...)", estilos["formula"]))
-    elementos.append(Paragraph("Centroide: z*=Sum[z_i*mu(z_i)]/Sum[mu(z_i)]", estilos["formula"]))
+    elementos.append(PageBreak())
+    _agregar_formulas_mamdani(elementos, estilos)
 
-    elementos.append(Paragraph("Grados de pertenencia", estilos["subtitulo"]))
+    _seccion(
+        elementos,
+        "Grados de pertenencia",
+        "En esta etapa el sistema determina que tan representativa es cada condicion de entrada "
+        "respecto a sus conjuntos linguisticos. Los valores activos se resaltan en verde.",
+        estilos,
+    )
     elementos.append(_tabla_grados(resultado))
+    elementos.append(Spacer(1, 0.3 * cm))
 
-    elementos.append(Paragraph("Reglas activadas", estilos["subtitulo"]))
-    elementos.append(_tabla_reglas(resultado))
+    elementos.append(PageBreak())
+    _seccion(
+        elementos,
+        "Reglas activadas",
+        "Solo se muestran las reglas cuya activacion fue mayor que cero. Cada tarjeta indica "
+        "la condicion, los consecuentes, el grado de activacion y una interpretacion breve.",
+        estilos,
+    )
+    _agregar_tarjetas_reglas(elementos, resultado, estilos)
 
-    elementos.append(Paragraph("Resultado del centroide", estilos["subtitulo"]))
+    _seccion(
+        elementos,
+        "Resultado del centroide",
+        "Despues de combinar todas las reglas activadas, el sistema obtiene un unico valor numerico "
+        "para cada salida mediante el metodo del centroide.",
+        estilos,
+    )
     elementos.append(
         Paragraph(
             f"Centroide tiempo={float(resultado['tiempo_riego']):.4f}, "
@@ -273,13 +578,28 @@ def generar_reporte_pdf(
     )
 
     elementos.append(PageBreak())
-    elementos.append(Paragraph("Graficos de pertenencia y salidas agregadas", estilos["subtitulo"]))
+    _seccion(
+        elementos,
+        "Graficos",
+        "Los graficos permiten observar visualmente las funciones de pertenencia evaluadas y "
+        "las salidas agregadas utilizadas para calcular el centroide.",
+        estilos,
+    )
     if entradas:
         rutas_graficos = _generar_graficos(resultado, entradas, carpeta_graficos)
         _agregar_imagenes(elementos, rutas_graficos, estilos)
     else:
         elementos.append(Paragraph("No se recibieron entradas para graficar los valores ingresados.", estilos["normal"]))
 
+    elementos.append(PageBreak())
+    _seccion(
+        elementos,
+        "Recomendacion final",
+        "Finalmente el sistema genera la recomendacion de riego considerando todas las condiciones analizadas.",
+        estilos,
+    )
+    _agregar_recomendacion_final(elementos, resultado, estilos)
+    elementos.append(Spacer(1, 0.35 * cm))
     elementos.append(Paragraph("Conclusion breve del escenario", estilos["subtitulo"]))
     regla_principal = max(resultado["reglas_activadas"], key=lambda regla: float(regla["grado_activacion"]))
     elementos.append(
@@ -292,5 +612,13 @@ def generar_reporte_pdf(
         )
     )
 
-    documento.build(elementos)
+    documento.build(
+        elementos,
+        canvasmaker=lambda *args, **kwargs: _CanvasNumerado(
+            *args,
+            fecha_hora=fecha_hora,
+            autores=autores,
+            **kwargs,
+        ),
+    )
     return ruta_pdf
