@@ -220,6 +220,81 @@
     color: #12372a !important;
 }
 
+.gradio-container .light-dataframe,
+.gradio-container .light-dataframe *,
+.gradio-container .membership-table,
+.gradio-container .membership-table * {
+    color: #1f2937 !important;
+}
+
+.gradio-container .light-dataframe,
+.gradio-container .membership-table {
+    background: #ffffff !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08) !important;
+}
+
+.gradio-container .light-dataframe table,
+.gradio-container .membership-table table,
+.gradio-container .light-dataframe .table-wrap,
+.gradio-container .membership-table .table-wrap,
+.gradio-container .light-dataframe [role="grid"],
+.gradio-container .membership-table [role="grid"] {
+    background: #ffffff !important;
+    border-color: #bfdbfe !important;
+}
+
+.gradio-container .light-dataframe thead,
+.gradio-container .membership-table thead,
+.gradio-container .light-dataframe th,
+.gradio-container .membership-table th,
+.gradio-container .light-dataframe [role="columnheader"],
+.gradio-container .membership-table [role="columnheader"] {
+    background: #dbeafe !important;
+    color: #1e3a8a !important;
+    border-color: #93c5fd !important;
+    font-weight: 700 !important;
+}
+
+.gradio-container .light-dataframe tbody,
+.gradio-container .membership-table tbody,
+.gradio-container .light-dataframe tr,
+.gradio-container .membership-table tr,
+.gradio-container .light-dataframe td,
+.gradio-container .membership-table td,
+.gradio-container .light-dataframe [role="row"],
+.gradio-container .membership-table [role="row"],
+.gradio-container .light-dataframe [role="gridcell"],
+.gradio-container .membership-table [role="gridcell"] {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border-color: #dbeafe !important;
+}
+
+.gradio-container .light-dataframe tr:nth-child(even) td,
+.gradio-container .membership-table tr:nth-child(even) td,
+.gradio-container .light-dataframe [role="row"]:nth-child(even) [role="gridcell"],
+.gradio-container .membership-table [role="row"]:nth-child(even) [role="gridcell"] {
+    background: #f8fbff !important;
+}
+
+.gradio-container .light-dataframe tr:hover td,
+.gradio-container .membership-table tr:hover td,
+.gradio-container .light-dataframe [role="row"]:hover [role="gridcell"],
+.gradio-container .membership-table [role="row"]:hover [role="gridcell"] {
+    background: #eff6ff !important;
+    color: #1e3a8a !important;
+}
+
+.gradio-container .light-dataframe input,
+.gradio-container .membership-table input {
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border-color: #cbd5e1 !important;
+}
+
 @media (max-width: 760px) {
     .gradio-container .slider-row {
         flex-direction: column !important;

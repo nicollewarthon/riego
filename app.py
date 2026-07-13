@@ -1335,7 +1335,14 @@ def crear_interfaz() -> gr.Blocks:
             with gr.Row():
                 grafico_membresia = gr.Plot(label="Funciones de pertenencia")
                 grafico_salida_agregada = gr.Plot(label="Salida agregada")
-            gr.Dataframe(value=tabla_funciones_pertenencia, interactive=False, wrap=True)
+            gr.Dataframe(
+                value=tabla_funciones_pertenencia,
+                interactive=False,
+                wrap=True,
+                max_height=430,
+                show_row_numbers=False,
+                elem_classes=["light-dataframe", "membership-table"],
+            )
 
         with gr.Tab("Base de reglas"):
             gr.Markdown("### Base de reglas Mamdani")
