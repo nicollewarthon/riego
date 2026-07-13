@@ -1270,6 +1270,44 @@ def tabla_parametros_variable(nombre_variable: str) -> pd.DataFrame:
     return tabla
 
 
+def tabla_parametros_variable_html(nombre_variable: str) -> str:
+    """Renderiza los mismos parametros como una tabla HTML legible tipo hoja de calculo."""
+    tabla = tabla_parametros_variable(nombre_variable)
+    encabezados = {
+        "Variable": "Variable",
+        "Conjunto linguistico": "Conjunto lingüístico",
+        "Tipo de funcion": "Tipo de función",
+        "Parametros": "Parámetros",
+        "Rango": "Rango",
+    }
+    columnas = list(encabezados.keys())
+
+    filas_html = []
+    for _, fila in tabla.iterrows():
+        celdas = "".join(
+            f"<td>{html.escape(str(fila[columna]))}</td>"
+            for columna in columnas
+        )
+        filas_html.append(f"<tr>{celdas}</tr>")
+
+    encabezados_html = "".join(f"<th>{html.escape(etiqueta)}</th>" for etiqueta in encabezados.values())
+    cuerpo = "".join(filas_html) or (
+        "<tr><td colspan='5'>No hay parametros disponibles para la variable seleccionada.</td></tr>"
+    )
+    return f"""
+<div class="membership-table-shell">
+    <div class="membership-table-scroll" role="region" aria-label="Tabla de parametros de pertenencia">
+        <table class="excel-membership-table">
+            <thead>
+                <tr>{encabezados_html}</tr>
+            </thead>
+            <tbody>{cuerpo}</tbody>
+        </table>
+    </div>
+</div>
+"""
+
+
 def tabla_reglas() -> pd.DataFrame:
     """Devuelve tabla de reglas difusas."""
     return pd.DataFrame(rules.obtener_tabla_reglas())
@@ -2003,15 +2041,11 @@ def crear_interfaz() -> gr.Blocks:
                 grafico_membresia = gr.Plot(label="Funciones de pertenencia")
             with gr.Column(elem_classes=["section-card", "plot-section"]):
                 grafico_salida_agregada = gr.Plot(label="Salida agregada")
-            with gr.Column(elem_classes=["section-card"]):
+            with gr.Column(elem_classes=["section-card", "membership-table-card"]):
                 gr.Markdown("### Tabla de parametros")
-                tabla_parametros_membresia = gr.Dataframe(
-                    value=lambda: tabla_parametros_variable("humedad_suelo"),
-                    interactive=False,
-                    wrap=True,
-                    max_height=520,
-                    show_row_numbers=False,
-                    elem_classes=["wide-dataframe", "membership-table", "membership-params-table"],
+                tabla_parametros_membresia = gr.HTML(
+                    value=tabla_parametros_variable_html("humedad_suelo"),
+                    elem_classes=["membership-params-table"],
                 )
             with gr.Column(elem_classes=["section-card", "math-note"]):
                 gr.Markdown(
@@ -2348,7 +2382,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementad
             outputs=grafico_membresia,
         )
         selector_variable.change(
-            fn=tabla_parametros_variable,
+            fn=tabla_parametros_variable_html,
             inputs=selector_variable,
             outputs=tabla_parametros_membresia,
         )
@@ -2366,7 +2400,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementad
             inputs=entradas_grafico_agregado,
             outputs=grafico_salida_agregada,
         ).then(
-            fn=tabla_parametros_variable,
+            fn=tabla_parametros_variable_html,
             inputs=selector_variable,
             outputs=tabla_parametros_membresia,
         )

@@ -587,9 +587,25 @@ body [role="menu"] [aria-selected="true"]:hover,
     color: #1f2937 !important;
 }
 
+.gradio-container .membership-table-card {
+    padding: 22px !important;
+}
+
 .gradio-container .membership-params-table {
     width: 100% !important;
     max-width: 100% !important;
+    min-height: 300px !important;
+    overflow: visible !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.gradio-container .membership-table-shell {
+    width: 95% !important;
+    max-width: 95% !important;
+    min-height: 285px !important;
+    margin: 8px auto 0 auto !important;
     background: #ffffff !important;
     border: 1px solid #d9d6e3 !important;
     border-radius: 14px !important;
@@ -597,49 +613,75 @@ body [role="menu"] [aria-selected="true"]:hover,
     overflow: hidden !important;
 }
 
-.gradio-container .membership-params-table .table-wrap,
-.gradio-container .membership-params-table [role="grid"] {
+.gradio-container .membership-table-scroll {
     width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: auto !important;
-    overflow-y: auto !important;
+    min-height: 285px !important;
+    max-height: 430px !important;
+    overflow: auto !important;
 }
 
-.gradio-container .membership-params-table table {
+.gradio-container .excel-membership-table {
     width: max-content !important;
     min-width: 100% !important;
-    table-layout: auto !important;
     border-collapse: collapse !important;
+    table-layout: auto !important;
+    font-size: 14px !important;
 }
 
-.gradio-container .membership-params-table th,
-.gradio-container .membership-params-table [role="columnheader"] {
+.gradio-container .excel-membership-table th {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 3 !important;
     background: #f3eeff !important;
-    color: #24304a !important;
-    border-color: #d9d6e3 !important;
-    font-weight: 700 !important;
+    color: #1e2a44 !important;
+    border: 1px solid #d9d6e3 !important;
+    padding: 13px 16px !important;
+    text-align: left !important;
+    font-weight: 800 !important;
     white-space: nowrap !important;
-    min-width: 150px !important;
-    padding: 12px 14px !important;
+    line-height: 1.25 !important;
 }
 
-.gradio-container .membership-params-table td,
-.gradio-container .membership-params-table [role="gridcell"] {
+.gradio-container .excel-membership-table td {
     background: #ffffff !important;
     color: #1f2937 !important;
-    border-color: #e5e7eb !important;
+    border: 1px solid #e5e7eb !important;
+    padding: 12px 16px !important;
+    text-align: left !important;
     white-space: nowrap !important;
-    min-width: 150px !important;
-    padding: 11px 14px !important;
+    line-height: 1.35 !important;
 }
 
-.gradio-container .membership-params-table tr:nth-child(even) td,
-.gradio-container .membership-params-table [role="row"]:nth-child(even) [role="gridcell"] {
+.gradio-container .excel-membership-table th:nth-child(1),
+.gradio-container .excel-membership-table td:nth-child(1) {
+    min-width: 190px !important;
+}
+
+.gradio-container .excel-membership-table th:nth-child(2),
+.gradio-container .excel-membership-table td:nth-child(2) {
+    min-width: 210px !important;
+}
+
+.gradio-container .excel-membership-table th:nth-child(3),
+.gradio-container .excel-membership-table td:nth-child(3) {
+    min-width: 170px !important;
+}
+
+.gradio-container .excel-membership-table th:nth-child(4),
+.gradio-container .excel-membership-table td:nth-child(4) {
+    min-width: 190px !important;
+}
+
+.gradio-container .excel-membership-table th:nth-child(5),
+.gradio-container .excel-membership-table td:nth-child(5) {
+    min-width: 150px !important;
+}
+
+.gradio-container .excel-membership-table tbody tr:nth-child(even) td {
     background: #fbf9ff !important;
 }
 
-.gradio-container .membership-params-table tr:hover td,
-.gradio-container .membership-params-table [role="row"]:hover [role="gridcell"] {
+.gradio-container .excel-membership-table tbody tr:hover td {
     background: #efe7ff !important;
     color: #1f2937 !important;
 }
