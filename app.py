@@ -75,20 +75,47 @@ SUPERFICIES_3D = {
 }
 
 
+def crear_tema_claro() -> gr.Theme:
+    """Crea un tema claro para evitar acentos oscuros o morados de Gradio."""
+    return gr.themes.Soft(
+        primary_hue="blue",
+        secondary_hue="cyan",
+        neutral_hue="blue",
+    ).set(
+        body_background_fill="#ffffff",
+        block_background_fill="#ffffff",
+        block_border_color="#bfdbfe",
+        block_label_background_fill="#dbeafe",
+        block_label_text_color="#1e3a8a",
+        button_primary_background_fill="#0f766e",
+        button_primary_background_fill_hover="#0d9488",
+        button_primary_text_color="#ffffff",
+        button_secondary_background_fill="#ffffff",
+        button_secondary_background_fill_hover="#eff6ff",
+        button_secondary_text_color="#2563eb",
+        input_background_fill="#ffffff",
+        input_border_color="#d1d5db",
+    )
+
+
 CSS = """
 :root {
     --verde: #1f7a4d;
     --verde-claro: #e8f5ed;
-    --azul: #1f6f9f;
-    --azul-claro: #eaf5fb;
-    --gris: #000000;
-    --gris-suave: #000000;
+    --azul: #2563eb;
+    --azul-claro: #eff6ff;
+    --cian-claro: #ecfeff;
+    --texto: #1e3a8a;
+    --texto-suave: #1e40af;
+    --borde: #bfdbfe;
+    --borde-fuerte: #93c5fd;
+    --superficie: #ffffff;
 }
 .gradio-container {
     max-width: 1180px !important;
     margin: 0 auto !important;
     background: linear-gradient(180deg, #f7fbf8 0%, #ffffff 45%) !important;
-    color: var(--gris) !important;
+    color: var(--texto) !important;
 }
 .gradio-container,
 .gradio-container p,
@@ -103,18 +130,18 @@ CSS = """
 .gradio-container .prose,
 .gradio-container .markdown,
 .gradio-container .table-wrap {
-    color: var(--gris) !important;
+    color: var(--texto) !important;
 }
 .gradio-container h1,
 .gradio-container h2,
 .gradio-container h3,
 .gradio-container h4 {
-    color: #000000 !important;
+    color: var(--texto) !important;
 }
 .gradio-container *,
 .gradio-container *::before,
 .gradio-container *::after {
-    color: #000000 !important;
+    color: var(--texto) !important;
 }
 .gradio-container .block,
 .gradio-container .form,
@@ -122,12 +149,12 @@ CSS = """
 .gradio-container textarea,
 .gradio-container input,
 .gradio-container select {
-    background: #ffffff !important;
+    background: var(--superficie) !important;
 }
 .gradio-container textarea,
 .gradio-container input,
 .gradio-container select {
-    border-color: #94a3b8 !important;
+    border-color: var(--borde) !important;
 }
 .hero {
     padding: 28px;
@@ -136,26 +163,26 @@ CSS = """
     border: 1px solid #cfe8d8;
 }
 .hero h1 {
-    color: #000000 !important;
+    color: #14532d !important;
     margin-bottom: 8px;
 }
 .hero p, .texto-suave {
-    color: var(--gris-suave) !important;
+    color: var(--texto-suave) !important;
 }
 .metric-card {
     padding: 18px;
     border-radius: 8px;
-    background: #ffffff;
+    background: var(--superficie);
     border: 1px solid #dbeafe;
-    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.08);
 }
 .metric-label {
-    color: #000000 !important;
+    color: var(--texto) !important;
     font-size: 0.9rem;
     font-weight: 700;
 }
 .metric-value {
-    color: #000000 !important;
+    color: #0f766e !important;
     font-size: 1.7rem;
     font-weight: 800;
 }
@@ -166,11 +193,11 @@ CSS = """
     border: 1px solid #dbeafe;
 }
 .ok {
-    color: #000000 !important;
+    color: #0f766e !important;
     font-weight: 700;
 }
 .pending {
-    color: #475569 !important;
+    color: var(--texto-suave) !important;
 }
 .rule-table {
     width: 100%;
@@ -178,32 +205,41 @@ CSS = """
     font-size: 0.92rem;
 }
 .rule-table th {
-    background: #e8f5ed;
-    color: #000000 !important;
+    background: #dbeafe;
+    color: var(--texto) !important;
     text-align: left;
     padding: 8px;
-    border: 1px solid #cbd5e1;
+    border: 1px solid var(--borde);
 }
 .rule-table td {
     padding: 8px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid #dbeafe;
     vertical-align: top;
+    background: var(--superficie);
+    color: var(--texto) !important;
 }
 .rule-table tr.rule-max {
-    background: #dbeafe;
+    background: #eff6ff;
     font-weight: 700;
 }
 button.primary {
-    background: #1f7a4d !important;
-    color: #000000 !important;
-    border-color: #166534 !important;
+    background: #0f766e !important;
+    color: #ffffff !important;
+    border-color: #0f766e !important;
 }
 button.primary span,
 .gradio-container button.primary span {
-    color: #000000 !important;
+    color: #ffffff !important;
 }
 .gradio-container button:not(.primary) {
-    color: #000000 !important;
+    background: #ffffff !important;
+    color: var(--azul) !important;
+    border: 1px solid var(--borde-fuerte) !important;
+    box-shadow: none !important;
+}
+.gradio-container button:not(.primary):hover {
+    background: var(--azul-claro) !important;
+    color: var(--texto) !important;
 }
 @keyframes tabFadeSlide {
     from {
@@ -255,7 +291,7 @@ button.primary span,
     border-radius: 8px 8px 0 0 !important;
     background: transparent !important;
     box-shadow: none !important;
-    color: #000000 !important;
+    color: var(--texto) !important;
     font-weight: 600 !important;
     line-height: 1 !important;
     white-space: nowrap !important;
@@ -273,7 +309,7 @@ button.primary span,
 .gradio-container .tabs button:hover,
 .gradio-container button[role="tab"]:hover {
     background: #eff6ff !important;
-    color: #000000 !important;
+    color: var(--texto) !important;
 }
 .gradio-container .tab-nav button.selected,
 .gradio-container .tab-nav button.active,
@@ -323,9 +359,9 @@ button.primary span,
 .gradio-container .tab-nav ul,
 .gradio-container .tabs ul {
     border-radius: 12px !important;
-    border: 1px solid #dbeafe !important;
-    background: #ffffff !important;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.14) !important;
+    border: 1px solid var(--borde) !important;
+    background: var(--superficie) !important;
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.14) !important;
     padding: 6px !important;
     animation: dropdownFadeSlide 0.22s ease both !important;
 }
@@ -341,7 +377,7 @@ button.primary span,
     padding: 0 12px !important;
     border-radius: 8px !important;
     border-bottom: 0 !important;
-    color: #000000 !important;
+    color: var(--texto) !important;
     background: transparent !important;
 }
 .gradio-container .tab-nav [role="menu"] button:hover,
@@ -350,6 +386,115 @@ button.primary span,
 .gradio-container .tab-nav ul button:hover,
 .gradio-container .tabs ul button:hover {
     background: #eff6ff !important;
+}
+.gradio-container code,
+.gradio-container pre,
+.gradio-container pre code,
+.gradio-container .prose code,
+.gradio-container .markdown code {
+    background: #eef6ff !important;
+    color: #1e40af !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 8px !important;
+    padding: 2px 6px !important;
+    box-shadow: none !important;
+}
+.gradio-container pre {
+    padding: 12px !important;
+    white-space: pre-wrap !important;
+}
+.gradio-container .label-wrap,
+.gradio-container .label-wrap *,
+.gradio-container .block label,
+.gradio-container .block-title,
+.gradio-container .block-title *,
+.gradio-container .plot label,
+.gradio-container .output-class label {
+    background: #dbeafe !important;
+    color: #1e3a8a !important;
+    border: 1px solid #93c5fd !important;
+    border-radius: 10px !important;
+}
+.gradio-container .label-wrap,
+.gradio-container .block-title {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    padding: 4px 10px !important;
+    margin-bottom: 6px !important;
+}
+.gradio-container .badge,
+.gradio-container .token,
+.gradio-container .chip,
+.gradio-container .dataframe td span,
+.gradio-container .table-wrap td span {
+    background: #eff6ff !important;
+    color: #2563eb !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 8px !important;
+    padding: 2px 6px !important;
+}
+.gradio-container table,
+.gradio-container .dataframe,
+.gradio-container .table-wrap,
+.gradio-container .dataframe table {
+    background: #ffffff !important;
+    border-color: #bfdbfe !important;
+    color: var(--texto) !important;
+}
+.gradio-container table thead,
+.gradio-container table thead tr,
+.gradio-container table th,
+.gradio-container .dataframe th,
+.gradio-container .table-wrap th {
+    background: #dbeafe !important;
+    color: #1e3a8a !important;
+    border-color: #93c5fd !important;
+    font-weight: 700 !important;
+}
+.gradio-container table tbody tr,
+.gradio-container table tbody td,
+.gradio-container .dataframe td,
+.gradio-container .table-wrap td {
+    background: #ffffff !important;
+    color: var(--texto) !important;
+    border-color: #dbeafe !important;
+}
+.gradio-container table tbody tr:hover,
+.gradio-container .dataframe tr:hover,
+.gradio-container .table-wrap tr:hover,
+.gradio-container .dataframe tr:hover td,
+.gradio-container .table-wrap tr:hover td {
+    background: #eff6ff !important;
+}
+.gradio-container select,
+.gradio-container input,
+.gradio-container textarea,
+.gradio-container [role="combobox"],
+.gradio-container .dropdown,
+.gradio-container .dropdown input {
+    background: #ffffff !important;
+    color: var(--texto) !important;
+    border-color: #d1d5db !important;
+    border-radius: 10px !important;
+    box-shadow: none !important;
+}
+.gradio-container select:hover,
+.gradio-container input:hover,
+.gradio-container textarea:hover,
+.gradio-container [role="combobox"]:hover,
+.gradio-container .dropdown:hover {
+    background: #eff6ff !important;
+    border-color: #93c5fd !important;
+}
+.gradio-container .dropdown svg,
+.gradio-container .dropdown svg *,
+.gradio-container [role="combobox"] svg,
+.gradio-container [role="combobox"] svg *,
+.gradio-container .tab-nav svg,
+.gradio-container .tab-nav svg * {
+    color: #64748b !important;
+    stroke: #64748b !important;
 }
 @media (max-width: 760px) {
     .hero {
@@ -1357,4 +1502,4 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
 if __name__ == "__main__":
     demo = crear_interfaz()
     port = int(os.environ.get("PORT", 7860))
-    demo.launch(server_name="0.0.0.0", server_port=port, css=CSS, theme=gr.themes.Soft())
+    demo.launch(server_name="0.0.0.0", server_port=port, css=CSS, theme=crear_tema_claro())
