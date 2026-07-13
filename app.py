@@ -1827,47 +1827,44 @@ def crear_interfaz() -> gr.Blocks:
 
         with gr.Tab("Evaluar riego"):
             gr.Markdown("### Ingrese las condiciones actuales del cultivo")
-            with gr.Row(elem_classes=["evaluation-main-layout"]):
-                with gr.Column(scale=1):
-                    humedad_suelo, humedad_suelo_numero = crear_control_numerico(
-                        "Humedad del suelo (%)", 0, 100, 35, 1, 0
-                    )
-                    temperatura, temperatura_numero = crear_control_numerico(
-                        "Temperatura ambiental (C)", 0, 45, 28, 0.5, 1
-                    )
-                    humedad_ambiental, humedad_ambiental_numero = crear_control_numerico(
-                        "Humedad ambiental (%)", 0, 100, 55, 1, 0
-                    )
-                    velocidad_viento, velocidad_viento_numero = crear_control_numerico(
-                        "Velocidad del viento (km/h)", 0, 40, 12, 0.5, 1
-                    )
-                    with gr.Column(elem_classes=["input-card"]):
-                        gr.HTML("<div class='field-title'>Tipo de cultivo</div>")
-                        tipo_cultivo = gr.Dropdown(
-                            CULTIVOS,
-                            value="Tomate",
-                            show_label=False,
-                            filterable=False,
-                            allow_custom_value=False,
-                            buttons=[],
-                            elem_id="tipo-cultivo-select",
-                            elem_classes=["clean-dropdown"],
-                        )
-                    boton_calcular = gr.Button("Calcular riego inteligente", variant="primary")
-                    boton_procedimiento = gr.Button("Ver procedimiento Mamdani paso a paso")
-                    boton_reporte_pdf = gr.Button("Descargar reporte PDF")
-                with gr.Column(scale=1):
-                    estado = gr.HTML(estado_proceso("Analizando condiciones"))
-                    salida_tiempo = gr.HTML(formatear_tarjeta("Tiempo de riego", "-", "minutos"))
-                    salida_frecuencia = gr.HTML(formatear_tarjeta("Frecuencia de riego", "-", "dias"))
-                    salida_caudal = gr.HTML(formatear_tarjeta("Caudal", "-", "L/min"))
-                    salida_interpretacion = gr.Textbox(
-                        label="Interpretacion del sistema",
-                        lines=5,
-                        interactive=False,
-                    )
-                    archivo_reporte_pdf = gr.File(label="Reporte PDF")
-                    mensaje_reporte_pdf = gr.Textbox(label="Estado del reporte", interactive=False)
+            humedad_suelo, humedad_suelo_numero = crear_control_numerico(
+                "Humedad del suelo (%)", 0, 100, 35, 1, 0
+            )
+            temperatura, temperatura_numero = crear_control_numerico(
+                "Temperatura ambiental (C)", 0, 45, 28, 0.5, 1
+            )
+            humedad_ambiental, humedad_ambiental_numero = crear_control_numerico(
+                "Humedad ambiental (%)", 0, 100, 55, 1, 0
+            )
+            velocidad_viento, velocidad_viento_numero = crear_control_numerico(
+                "Velocidad del viento (km/h)", 0, 40, 12, 0.5, 1
+            )
+            with gr.Column(elem_classes=["input-card"]):
+                gr.HTML("<div class='field-title'>Tipo de cultivo</div>")
+                tipo_cultivo = gr.Dropdown(
+                    CULTIVOS,
+                    value="Tomate",
+                    show_label=False,
+                    filterable=False,
+                    allow_custom_value=False,
+                    buttons=[],
+                    elem_id="tipo-cultivo-select",
+                    elem_classes=["clean-dropdown"],
+                )
+            estado = gr.HTML(estado_proceso("Analizando condiciones"))
+            salida_tiempo = gr.HTML(formatear_tarjeta("Tiempo de riego", "-", "minutos"))
+            salida_frecuencia = gr.HTML(formatear_tarjeta("Frecuencia de riego", "-", "dias"))
+            salida_caudal = gr.HTML(formatear_tarjeta("Caudal", "-", "L/min"))
+            salida_interpretacion = gr.Textbox(
+                label="Interpretacion del sistema",
+                lines=5,
+                interactive=False,
+            )
+            archivo_reporte_pdf = gr.File(label="Reporte PDF")
+            mensaje_reporte_pdf = gr.Textbox(label="Estado del reporte", interactive=False)
+            boton_calcular = gr.Button("Calcular riego inteligente", variant="primary")
+            boton_procedimiento = gr.Button("Ver procedimiento Mamdani paso a paso")
+            boton_reporte_pdf = gr.Button("Descargar reporte PDF")
             with gr.Column(
                 elem_id="procedimiento-evaluacion-section",
                 elem_classes=["procedure-section"],

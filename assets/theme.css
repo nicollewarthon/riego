@@ -546,19 +546,6 @@ body [role="menu"] [aria-selected="true"]:hover,
     overflow: visible;
 }
 
-.gradio-container .evaluation-main-layout {
-    width: 100% !important;
-    align-items: flex-start !important;
-    flex-wrap: nowrap !important;
-    overflow: visible !important;
-}
-
-.gradio-container .evaluation-main-layout > *,
-.gradio-container .evaluation-main-layout .column {
-    min-width: 0 !important;
-    flex-shrink: 1 !important;
-}
-
 .gradio-container .procedure-section,
 .gradio-container #procedimiento-evaluacion-section {
     display: block !important;
@@ -570,8 +557,6 @@ body [role="menu"] [aria-selected="true"]:hover,
     padding-top: 22px !important;
     border-top: 1px solid #e5e7eb !important;
     overflow: visible !important;
-    flex: 0 0 100% !important;
-    grid-column: 1 / -1 !important;
     clear: both !important;
 }
 
@@ -724,10 +709,6 @@ body [role="menu"] [aria-selected="true"]:hover,
 }
 
 @media (max-width: 760px) {
-    .gradio-container .evaluation-main-layout {
-        flex-wrap: wrap !important;
-    }
-
     .mamdani-card {
         padding: 16px;
     }
