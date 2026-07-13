@@ -81,12 +81,48 @@ CSS = """
     --verde-claro: #e8f5ed;
     --azul: #1f6f9f;
     --azul-claro: #eaf5fb;
-    --gris: #334155;
+    --gris: #0f172a;
+    --gris-suave: #334155;
 }
 .gradio-container {
     max-width: 1180px !important;
     margin: 0 auto !important;
     background: linear-gradient(180deg, #f7fbf8 0%, #ffffff 45%) !important;
+    color: var(--gris) !important;
+}
+.gradio-container,
+.gradio-container p,
+.gradio-container span,
+.gradio-container label,
+.gradio-container li,
+.gradio-container td,
+.gradio-container th,
+.gradio-container textarea,
+.gradio-container input,
+.gradio-container select,
+.gradio-container .prose,
+.gradio-container .markdown,
+.gradio-container .table-wrap {
+    color: var(--gris) !important;
+}
+.gradio-container h1,
+.gradio-container h2,
+.gradio-container h3,
+.gradio-container h4 {
+    color: #064e3b !important;
+}
+.gradio-container .block,
+.gradio-container .form,
+.gradio-container .panel,
+.gradio-container textarea,
+.gradio-container input,
+.gradio-container select {
+    background: #ffffff !important;
+}
+.gradio-container textarea,
+.gradio-container input,
+.gradio-container select {
+    border-color: #94a3b8 !important;
 }
 .hero {
     padding: 28px;
@@ -99,7 +135,7 @@ CSS = """
     margin-bottom: 8px;
 }
 .hero p, .texto-suave {
-    color: #334155;
+    color: var(--gris-suave) !important;
 }
 .metric-card {
     padding: 18px;
@@ -109,12 +145,12 @@ CSS = """
     box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
 }
 .metric-label {
-    color: #1f6f9f;
+    color: #0f5f89 !important;
     font-size: 0.9rem;
     font-weight: 700;
 }
 .metric-value {
-    color: #14532d;
+    color: #14532d !important;
     font-size: 1.7rem;
     font-weight: 800;
 }
@@ -129,7 +165,7 @@ CSS = """
     font-weight: 700;
 }
 .pending {
-    color: #64748b;
+    color: #475569 !important;
 }
 .rule-table {
     width: 100%;
@@ -154,6 +190,15 @@ CSS = """
 }
 button.primary {
     background: #1f7a4d !important;
+    color: #ffffff !important;
+    border-color: #166534 !important;
+}
+button.primary span,
+.gradio-container button.primary span {
+    color: #ffffff !important;
+}
+.gradio-container button:not(.primary) {
+    color: #0f172a !important;
 }
 @media (max-width: 760px) {
     .hero {
