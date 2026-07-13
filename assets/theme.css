@@ -1038,8 +1038,7 @@ body .options {
 
 .gradio-container .wide-dataframe .table-wrap,
 .gradio-container .rules-dataframe .table-wrap,
-.gradio-container .rule-viewer-dataframe .table-wrap,
-.gradio-container .history-dataframe .table-wrap {
+.gradio-container .rule-viewer-dataframe .table-wrap {
     overflow: auto !important;
 }
 
@@ -1051,8 +1050,7 @@ body .options {
 }
 
 .gradio-container .rules-dataframe tr:nth-child(even) td,
-.gradio-container .rule-viewer-dataframe tr:nth-child(even) td,
-.gradio-container .history-dataframe tr:nth-child(even) td {
+.gradio-container .rule-viewer-dataframe tr:nth-child(even) td {
     background: #f8fbf9 !important;
 }
 
@@ -1067,13 +1065,44 @@ body .options {
     overflow: visible !important;
 }
 
-.gradio-container .surface-panel .surface-fixed-grid {
-    gap: 18px !important;
-    align-items: stretch !important;
+.gradio-container .surface-header-card,
+.gradio-container .surface-header-card *,
+.gradio-container .surface-combobox,
+.gradio-container .surface-combobox *,
+.gradio-container #surface-selector,
+.gradio-container #surface-selector *,
+.gradio-container #surface-cultivo-selector,
+.gradio-container #surface-cultivo-selector * {
+    overflow: visible !important;
 }
 
-.gradio-container .surface-panel input,
-.gradio-container .surface-panel [role="combobox"],
+.gradio-container .surface-header-card {
+    position: relative !important;
+    z-index: 85000 !important;
+}
+
+.gradio-container .surface-header-card:focus-within {
+    z-index: 125000 !important;
+}
+
+.gradio-container .surface-selector-row {
+    align-items: stretch !important;
+    gap: 18px !important;
+    width: 100% !important;
+}
+
+.gradio-container .surface-combobox {
+    position: relative !important;
+    z-index: 90000 !important;
+    width: 100% !important;
+}
+
+.gradio-container .surface-combobox [role="combobox"],
+.gradio-container .surface-combobox input,
+.gradio-container #surface-selector [role="combobox"],
+.gradio-container #surface-selector input,
+.gradio-container #surface-cultivo-selector [role="combobox"],
+.gradio-container #surface-cultivo-selector input,
 .gradio-container .rules-panel input,
 .gradio-container .rules-panel [role="combobox"],
 .gradio-container .more-menu-card [role="combobox"] {
@@ -1081,6 +1110,86 @@ body .options {
     color: #1f2937 !important;
     border: 1px solid #cbd5e1 !important;
     border-radius: 10px !important;
+}
+
+.gradio-container .surface-combobox [role="listbox"],
+.gradio-container .surface-combobox .options,
+.gradio-container .surface-combobox .dropdown-options,
+.gradio-container #surface-selector [role="listbox"],
+.gradio-container #surface-selector .options,
+.gradio-container #surface-selector .dropdown-options,
+.gradio-container #surface-cultivo-selector [role="listbox"],
+.gradio-container #surface-cultivo-selector .options,
+.gradio-container #surface-cultivo-selector .dropdown-options {
+    position: absolute !important;
+    top: calc(100% + 6px) !important;
+    left: 0 !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-height: min(340px, 52vh) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    background: #ffffff !important;
+    border: 1px solid #d7d2e8 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 16px 34px rgba(88, 70, 140, 0.16) !important;
+    z-index: 130000 !important;
+    animation: dropdownOpen 0.18s ease both !important;
+}
+
+.gradio-container .surface-combobox [role="option"],
+.gradio-container #surface-selector [role="option"],
+.gradio-container #surface-cultivo-selector [role="option"] {
+    display: flex !important;
+    align-items: center !important;
+    min-height: 38px !important;
+    padding: 8px 12px !important;
+    border-radius: 10px !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+}
+
+.gradio-container .surface-combobox [role="option"]:hover,
+.gradio-container .surface-combobox [role="option"][aria-selected="true"],
+.gradio-container #surface-selector [role="option"]:hover,
+.gradio-container #surface-selector [role="option"][aria-selected="true"],
+.gradio-container #surface-cultivo-selector [role="option"]:hover,
+.gradio-container #surface-cultivo-selector [role="option"][aria-selected="true"] {
+    background: #f3eeff !important;
+    color: #1f2937 !important;
+}
+
+.gradio-container .surface-control-card {
+    padding: 18px 22px !important;
+}
+
+.gradio-container .surface-slider,
+.gradio-container .surface-slider .wrap,
+.gradio-container .surface-slider .container {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.gradio-container .surface-slider input[type="range"] {
+    width: 100% !important;
+    height: 6px !important;
+    border-radius: 999px !important;
+    accent-color: #0f766e !important;
+}
+
+.gradio-container .surface-slider input[type="number"] {
+    min-width: 94px !important;
+    height: 38px !important;
+    background: #ffffff !important;
+    color: #1f2937 !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    box-shadow: none !important;
 }
 
 .gradio-container .final-reading {
@@ -1116,8 +1225,13 @@ body .options {
     }
 
     .gradio-container .controls-grid,
-    .gradio-container .surface-panel .surface-fixed-grid {
+    .gradio-container .surface-selector-row {
         gap: 12px !important;
+    }
+
+    .gradio-container .surface-selector-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
     }
 }
 

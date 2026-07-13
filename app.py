@@ -20,14 +20,12 @@ import pandas as pd
 
 import charts
 import fuzzy_engine
-import history
 import membership
 import report
 import rules
 
 
 TITULO = "Sistema Inteligente para el Riego Automatico mediante Logica Difusa Mamdani"
-RUTA_HISTORIAL = Path("data") / "historial.csv"
 RUTA_CSS_TEMA = Path("assets") / "theme.css"
 CULTIVOS = ["Lechuga", "Tomate", "Maíz", "Papa", "Fresa"]
 SALIDAS = {
@@ -1386,11 +1384,10 @@ def tabla_reglas_html() -> str:
 """
 
 
-def mostrar_seccion_mas(opcion: str) -> tuple[gr.update, gr.update, gr.update]:
+def mostrar_seccion_mas(opcion: str) -> tuple[gr.update, gr.update]:
     """Muestra solo la seccion seleccionada dentro del menu Mas."""
     return (
         gr.update(visible=opcion == "Surface Viewer"),
-        gr.update(visible=opcion == "Historial"),
         gr.update(visible=opcion == "Acerca del proyecto"),
     )
 
@@ -1853,60 +1850,6 @@ def superficie_pendiente():
     return fig, None, "La superficie 3D se calculara cuando presione Actualizar superficie."
 
 
-def cargar_tabla_historial() -> pd.DataFrame:
-    """Carga el historial disponible desde CSV."""
-    try:
-        return history.leer_historial(RUTA_HISTORIAL)
-    except Exception as error:
-        return pd.DataFrame({"error": [str(error)]})
-
-
-def guardar_evaluacion_historial(
-    resultado: dict[str, Any] | None,
-    humedad_suelo: float,
-    temperatura: float,
-    humedad_ambiental: float,
-    velocidad_viento: float,
-    tipo_cultivo: str,
-) -> tuple[pd.DataFrame, str]:
-    """Guarda la ultima evaluacion calculada en el historial CSV."""
-    if not resultado:
-        _, _, _, _, _, resultado = ejecutar_calculo(
-            humedad_suelo,
-            temperatura,
-            humedad_ambiental,
-            velocidad_viento,
-            tipo_cultivo,
-        )
-    try:
-        tabla = history.guardar_evaluacion(
-            humedad_suelo=humedad_suelo,
-            temperatura_ambiental=temperatura,
-            humedad_ambiental=humedad_ambiental,
-            velocidad_viento=velocidad_viento,
-            tipo_cultivo=tipo_cultivo,
-            resultado=resultado,
-            ruta_csv=RUTA_HISTORIAL,
-        )
-        return tabla, "Evaluacion guardada correctamente en data/historial.csv."
-    except Exception as error:
-        return cargar_tabla_historial(), f"No se pudo guardar la evaluacion: {error}"
-
-
-def descargar_historial_csv() -> str:
-    """Devuelve el archivo CSV del historial para descarga."""
-    return history.descargar_historial(RUTA_HISTORIAL)
-
-
-def limpiar_historial_interfaz() -> tuple[pd.DataFrame, str]:
-    """Limpia el historial desde la interfaz."""
-    try:
-        tabla = history.limpiar_historial(RUTA_HISTORIAL)
-        return tabla, "Historial limpiado correctamente."
-    except Exception as error:
-        return cargar_tabla_historial(), f"No se pudo limpiar el historial: {error}"
-
-
 def generar_reporte_interfaz(
     resultado: dict[str, Any] | None,
     humedad_suelo: float,
@@ -2000,7 +1943,7 @@ def crear_interfaz() -> gr.Blocks:
                     </div>
                     <div class="module-card">
                         <h3>Reportes</h3>
-                        <p>Historial CSV y reporte PDF para documentar escenarios evaluados.</p>
+                        <p>Reporte PDF para documentar escenarios evaluados.</p>
                     </div>
                 </div>
 """
@@ -2172,7 +2115,7 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
         with gr.Tab("▼ Más"):
             with gr.Column(elem_classes=["section-card", "more-menu-card"]):
                 selector_mas = gr.Dropdown(
-                    choices=["Surface Viewer", "Historial", "Acerca del proyecto"],
+                    choices=["Surface Viewer", "Acerca del proyecto"],
                     value="Surface Viewer",
                     label="Seleccionar seccion",
                     filterable=False,
@@ -2181,13 +2124,13 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                 )
 
             with gr.Column(elem_classes=["more-section"], visible=True) as seccion_surface:
-                with gr.Column(elem_classes=["section-card", "surface-panel"]):
+                with gr.Column(elem_classes=["section-card", "surface-panel", "surface-header-card"]):
                     gr.Markdown("### Surface Viewer 3D")
                     gr.Markdown(
-                        "Cada punto de la malla se calcula con `fuzzy_engine.py`; no se usan "
-                        "formulas simplificadas ni valores inventados."
+                        "Esta herramienta permite visualizar cómo varían las salidas del sistema "
+                        "de inferencia Mamdani al modificar las variables de entrada."
                     )
-                    with gr.Row(elem_classes=["controls-grid"]):
+                    with gr.Row(elem_classes=["surface-selector-row"]):
                         superficie_surface = gr.Dropdown(
                             list(SUPERFICIES_3D.keys()),
                             value="Humedad del suelo vs temperatura ambiental -> tiempo de riego",
@@ -2195,6 +2138,8 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                             filterable=False,
                             allow_custom_value=False,
                             buttons=[],
+                            elem_id="surface-selector",
+                            elem_classes=["surface-combobox"],
                         )
                         cultivo_surface = gr.Dropdown(
                             CULTIVOS,
@@ -2203,20 +2148,53 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                             filterable=False,
                             allow_custom_value=False,
                             buttons=[],
+                            elem_id="surface-cultivo-selector",
+                            elem_classes=["surface-combobox"],
                         )
-                    with gr.Row(elem_classes=["surface-fixed-grid"]):
-                        with gr.Column():
-                            humedad_suelo_surface = gr.Slider(0, 100, value=35, step=1, label="Humedad del suelo fija (%)")
-                            temperatura_surface = gr.Slider(0, 45, value=28, step=0.5, label="Temperatura fija (C)")
-                        with gr.Column():
-                            humedad_surface = gr.Slider(0, 100, value=55, step=1, label="Humedad ambiental fija (%)")
-                            viento_surface = gr.Slider(0, 40, value=12, step=0.5, label="Viento fijo (km/h)")
+                with gr.Column(elem_classes=["section-card", "surface-control-card"]):
+                    humedad_suelo_surface = gr.Slider(
+                        0,
+                        100,
+                        value=35,
+                        step=1,
+                        label="Humedad del suelo fija (%)",
+                        elem_classes=["surface-slider"],
+                    )
+                with gr.Column(elem_classes=["section-card", "surface-control-card"]):
+                    temperatura_surface = gr.Slider(
+                        0,
+                        45,
+                        value=28,
+                        step=0.5,
+                        label="Temperatura ambiental fija (C)",
+                        elem_classes=["surface-slider"],
+                    )
+                with gr.Column(elem_classes=["section-card", "surface-control-card"]):
+                    humedad_surface = gr.Slider(
+                        0,
+                        100,
+                        value=55,
+                        step=1,
+                        label="Humedad ambiental fija (%)",
+                        elem_classes=["surface-slider"],
+                    )
+                with gr.Column(elem_classes=["section-card", "surface-control-card"]):
+                    viento_surface = gr.Slider(
+                        0,
+                        40,
+                        value=12,
+                        step=0.5,
+                        label="Velocidad del viento fija (km/h)",
+                        elem_classes=["surface-slider"],
+                    )
+                with gr.Column(elem_classes=["section-card", "surface-control-card"]):
                     resolucion_surface = gr.Slider(
                         10,
                         25,
                         value=15,
                         step=1,
                         label="Resolucion de malla por eje",
+                        elem_classes=["surface-slider"],
                     )
                     boton_surface = gr.Button("Actualizar superficie", variant="primary")
                 with gr.Column(elem_classes=["section-card", "plot-section", "surface-plot-card"]):
@@ -2224,28 +2202,6 @@ Para una funcion trapezoidal se agrega una zona de pertenencia maxima donde el g
                     archivo_surface = gr.File(label="Descargar imagen PNG")
                 with gr.Column(elem_classes=["section-card"]):
                     resumen_surface = gr.Textbox(label="Resumen del calculo", interactive=False, lines=3)
-
-            with gr.Column(elem_classes=["more-section"], visible=False) as seccion_historial:
-                with gr.Column(elem_classes=["section-card", "history-panel"]):
-                    gr.Markdown("### Historial de evaluaciones")
-                    with gr.Row(elem_classes=["controls-grid"]):
-                        boton_guardar_historial = gr.Button("Guardar evaluacion", variant="primary")
-                        boton_descargar_historial = gr.Button("Descargar historial CSV")
-                        boton_limpiar_historial = gr.Button("Limpiar historial")
-                    mensaje_historial = gr.Textbox(label="Estado del historial", interactive=False)
-                    tabla_historial = gr.Dataframe(
-                        value=cargar_tabla_historial,
-                        interactive=False,
-                        wrap=True,
-                        max_height=560,
-                        show_row_numbers=False,
-                        elem_classes=["light-dataframe", "wide-dataframe", "history-dataframe"],
-                    )
-                    archivo_historial = gr.File(label="Archivo CSV")
-                    gr.Markdown(
-                        "En servicios web como Render el almacenamiento puede reiniciarse segun el plan. "
-                        "Descargue el historial CSV si desea conservarlo."
-                    )
 
             with gr.Column(elem_classes=["more-section"], visible=False) as seccion_acerca:
                 with gr.Column(elem_classes=["section-card", "about-panel"]):
@@ -2355,25 +2311,12 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y l?gica difusa implementad
         selector_mas.change(
             fn=mostrar_seccion_mas,
             inputs=selector_mas,
-            outputs=[seccion_surface, seccion_historial, seccion_acerca],
-        )
-        boton_guardar_historial.click(
-            fn=guardar_evaluacion_historial,
-            inputs=[resultado_estado, *entradas],
-            outputs=[tabla_historial, mensaje_historial],
+            outputs=[seccion_surface, seccion_acerca],
         )
         boton_reporte_pdf.click(
             fn=generar_reporte_interfaz,
             inputs=[resultado_estado, *entradas],
             outputs=[archivo_reporte_pdf, mensaje_reporte_pdf],
-        )
-        boton_descargar_historial.click(
-            fn=descargar_historial_csv,
-            outputs=archivo_historial,
-        )
-        boton_limpiar_historial.click(
-            fn=limpiar_historial_interfaz,
-            outputs=[tabla_historial, mensaje_historial],
         )
         boton_procedimiento.click(
             fn=mostrar_procedimiento_evaluacion,
