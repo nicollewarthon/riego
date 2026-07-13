@@ -1,8 +1,8 @@
 """Manejo del historial de evaluaciones del sistema de riego.
 
-El historial se guarda en ``data/historial.csv``. En Hugging Face Spaces
-este archivo puede perderse si el entorno se reinicia, por lo que la
-interfaz permite descargar el CSV.
+El historial se guarda en ``data/historial.csv``. En servicios web como
+Render este archivo puede perderse si el entorno se reinicia o si el plan
+usa almacenamiento efimero, por lo que la interfaz permite descargar el CSV.
 """
 
 from __future__ import annotations

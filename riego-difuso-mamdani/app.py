@@ -1,10 +1,11 @@
 """Interfaz web profesional para el sistema de riego difuso Mamdani.
 
-Aplicacion preparada para CPU basica y Hugging Face Spaces.
+Aplicacion preparada para CPU basica y despliegue como servicio web en Render.
 """
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 from uuid import uuid4
 from typing import Any
@@ -739,6 +740,23 @@ def graficar_superficie(
     return fig, str(ruta_png), resumen
 
 
+def superficie_pendiente():
+    """Muestra un grafico liviano hasta que el usuario genere la superficie 3D."""
+    fig, ax = plt.subplots(figsize=(8, 4.5))
+    ax.text(
+        0.5,
+        0.5,
+        "Seleccione una superficie y presione\nActualizar superficie",
+        ha="center",
+        va="center",
+        fontsize=13,
+        color="#14532d",
+    )
+    ax.set_axis_off()
+    fig.tight_layout()
+    return fig, None, "La superficie 3D se calculara cuando presione Actualizar superficie."
+
+
 def cargar_tabla_historial() -> pd.DataFrame:
     """Carga el historial disponible desde CSV."""
     try:
@@ -976,7 +994,7 @@ def crear_interfaz() -> gr.Blocks:
             tabla_historial = gr.Dataframe(value=cargar_tabla_historial, interactive=False, wrap=True)
             archivo_historial = gr.File(label="Archivo CSV")
             gr.Markdown(
-                "En Hugging Face Spaces el almacenamiento puede reiniciarse. "
+                "En servicios web como Render el almacenamiento puede reiniciarse segun el plan. "
                 "Descargue el historial CSV si desea conservarlo."
             )
 
@@ -1128,19 +1146,7 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             ],
             outputs=[grafico_surface, archivo_surface, resumen_surface],
         )
-        demo.load(
-            fn=graficar_superficie,
-            inputs=[
-                superficie_surface,
-                cultivo_surface,
-                humedad_suelo_surface,
-                temperatura_surface,
-                humedad_surface,
-                viento_surface,
-                resolucion_surface,
-            ],
-            outputs=[grafico_surface, archivo_surface, resumen_surface],
-        )
+        demo.load(fn=superficie_pendiente, outputs=[grafico_surface, archivo_surface, resumen_surface])
         demo.load(
             fn=actualizar_rule_viewer,
             inputs=[resultado_estado, *entradas],
@@ -1154,4 +1160,5 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
 
 if __name__ == "__main__":
     demo = crear_interfaz()
-    demo.launch(server_name="0.0.0.0", server_port=7860, css=CSS, theme=gr.themes.Soft())
+    port = int(os.environ.get("PORT", 7860))
+    demo.launch(server_name="0.0.0.0", server_port=port, css=CSS, theme=gr.themes.Soft())
