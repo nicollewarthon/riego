@@ -540,6 +540,47 @@ body [role="menu"] [aria-selected="true"]:hover,
     flex-direction: column;
     gap: 22px;
     width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+.gradio-container .evaluation-main-layout {
+    width: 100% !important;
+    align-items: flex-start !important;
+    flex-wrap: nowrap !important;
+    overflow: visible !important;
+}
+
+.gradio-container .evaluation-main-layout > *,
+.gradio-container .evaluation-main-layout .column {
+    min-width: 0 !important;
+    flex-shrink: 1 !important;
+}
+
+.gradio-container .procedure-section,
+.gradio-container #procedimiento-evaluacion-section {
+    display: block !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    margin-top: 32px !important;
+    padding-top: 22px !important;
+    border-top: 1px solid #e5e7eb !important;
+    overflow: visible !important;
+    flex: 0 0 100% !important;
+    grid-column: 1 / -1 !important;
+    clear: both !important;
+}
+
+.gradio-container .procedure-section > *,
+.gradio-container #procedimiento-evaluacion-section > * {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
 }
 
 .mamdani-card {
@@ -551,6 +592,8 @@ body [role="menu"] [aria-selected="true"]:hover,
     padding: 24px;
     box-shadow: 0 10px 26px rgba(37, 99, 235, 0.08);
     overflow-wrap: anywhere;
+    min-width: 0;
+    overflow: visible;
 }
 
 .mamdani-card h2,
@@ -596,7 +639,7 @@ body [role="menu"] [aria-selected="true"]:hover,
     width: 100%;
     border-collapse: collapse;
     margin: 14px 0;
-    overflow: hidden;
+    overflow-x: auto;
     border-radius: 12px;
 }
 
@@ -636,6 +679,7 @@ body [role="menu"] [aria-selected="true"]:hover,
     border: 1px solid #e5e7eb;
     border-radius: 12px;
     padding: 12px;
+    overflow-x: auto;
 }
 
 .mamdani-plot {
@@ -680,6 +724,10 @@ body [role="menu"] [aria-selected="true"]:hover,
 }
 
 @media (max-width: 760px) {
+    .gradio-container .evaluation-main-layout {
+        flex-wrap: wrap !important;
+    }
+
     .mamdani-card {
         padding: 16px;
     }

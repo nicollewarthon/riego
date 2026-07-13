@@ -1208,6 +1208,26 @@ despues de la desfuzzificacion.</p>
 """
 
 
+def mostrar_procedimiento_evaluacion(
+    resultado: dict[str, Any] | None,
+    humedad_suelo: float,
+    temperatura: float,
+    humedad_ambiental: float,
+    velocidad_viento: float,
+    tipo_cultivo: str,
+) -> tuple[str, gr.update]:
+    """Genera el procedimiento y muestra su seccion independiente."""
+    procedimiento = generar_procedimiento(
+        resultado,
+        humedad_suelo,
+        temperatura,
+        humedad_ambiental,
+        velocidad_viento,
+        tipo_cultivo,
+    )
+    return procedimiento, gr.update(visible=True)
+
+
 def tabla_funciones_pertenencia() -> pd.DataFrame:
     """Devuelve tabla de parametros de membresia."""
     return pd.DataFrame(membership.obtener_tabla_parametros())
@@ -1807,7 +1827,7 @@ def crear_interfaz() -> gr.Blocks:
 
         with gr.Tab("Evaluar riego"):
             gr.Markdown("### Ingrese las condiciones actuales del cultivo")
-            with gr.Row():
+            with gr.Row(elem_classes=["evaluation-main-layout"]):
                 with gr.Column(scale=1):
                     humedad_suelo, humedad_suelo_numero = crear_control_numerico(
                         "Humedad del suelo (%)", 0, 100, 35, 1, 0
@@ -1848,14 +1868,19 @@ def crear_interfaz() -> gr.Blocks:
                     )
                     archivo_reporte_pdf = gr.File(label="Reporte PDF")
                     mensaje_reporte_pdf = gr.Textbox(label="Estado del reporte", interactive=False)
-            procedimiento_desde_evaluacion = gr.Markdown(
-                sanitize_html=False,
-                latex_delimiters=[
-                    {"left": "$$", "right": "$$", "display": True},
-                    {"left": "\\[", "right": "\\]", "display": True},
-                    {"left": "\\(", "right": "\\)", "display": False},
-                ],
-            )
+            with gr.Column(
+                elem_id="procedimiento-evaluacion-section",
+                elem_classes=["procedure-section"],
+                visible=False,
+            ) as procedimiento_evaluacion_contenedor:
+                procedimiento_desde_evaluacion = gr.Markdown(
+                    sanitize_html=False,
+                    latex_delimiters=[
+                        {"left": "$$", "right": "$$", "display": True},
+                        {"left": "\\[", "right": "\\]", "display": True},
+                        {"left": "\\(", "right": "\\)", "display": False},
+                    ],
+                )
 
         with gr.Tab("Procedimiento Mamdani"):
             gr.Markdown("### Trazabilidad matematica del ultimo calculo")
@@ -2121,9 +2146,9 @@ Python, Gradio, NumPy, Pandas, Matplotlib, ReportLab y lógica difusa implementa
             outputs=[tabla_historial, mensaje_historial],
         )
         boton_procedimiento.click(
-            fn=generar_procedimiento,
+            fn=mostrar_procedimiento_evaluacion,
             inputs=[resultado_estado, *entradas],
-            outputs=procedimiento_desde_evaluacion,
+            outputs=[procedimiento_desde_evaluacion, procedimiento_evaluacion_contenedor],
         ).then(
             fn=generar_procedimiento,
             inputs=[resultado_estado, *entradas],
